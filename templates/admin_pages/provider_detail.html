@@ -1,0 +1,134 @@
+{% extends "admin_pages/base.html" %}
+{% load static %}
+
+{% block title %}Provider Detail | Admin Dashboard{% endblock %}
+{% block nav_providers %}active{% endblock %}
+
+{% block content %}
+
+<div class="fn-page-header" style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
+    <a href="{% url 'admin_provider_list' %}" class="fn-back-btn">
+        <i class="icofont-arrow-left"></i> Back
+    </a>
+    <div>
+        <h1 class="fn-page-title">Provider Detail</h1>
+        <p class="fn-page-sub">View and manage provider profile</p>
+    </div>
+</div>
+
+<div class="fn-detail-grid">
+
+    <div class="fn-detail-card">
+        <div class="fn-detail-card-header">
+            <span class="fn-detail-card-title">Profile Information</span>
+            {% if provider.status == 'pending' %}
+                <span class="badge badge-warning">Pending</span>
+            {% elif provider.status == 'approved' %}
+                <span class="badge badge-success">Approved</span>
+            {% elif provider.status == 'rejected' %}
+                <span class="badge badge-danger">Rejected</span>
+            {% elif provider.status == 'suspended' %}
+                <span class="badge badge-secondary">Suspended</span>
+            {% endif %}
+        </div>
+        <div class="fn-info-list">
+            <div class="fn-info-row">
+                <span class="fn-info-label">ID</span>
+                <span class="fn-info-value">#{{ provider.id }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Full Name</span>
+                <span class="fn-info-value">{{ provider.user.get_full_name|default:"Not specified" }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Email</span>
+                <span class="fn-info-value">{{ provider.user.email }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Phone</span>
+                <span class="fn-info-value">{{ provider.user.phone|default:"Not specified" }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Category</span>
+                <span class="fn-info-value">{{ provider.category.name|default:"Not specified" }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Experience</span>
+                <span class="fn-info-value">{{ provider.experience_years }} years</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Registered</span>
+                <span class="fn-info-value">{{ provider.user.date_joined|date:"F d, Y" }}</span>
+            </div>
+            <div class="fn-info-row">
+                <span class="fn-info-label">Avg Rating</span>
+                <span class="fn-info-value">{{ provider.avg_rating }} / 5</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="fn-detail-card">
+        <div class="fn-detail-card-header">
+            <span class="fn-detail-card-title">Management Actions</span>
+        </div>
+        <div class="fn-actions-list">
+            {% if provider.status == 'pending' or provider.status == 'suspended' %}
+            <form method="POST" action="{% url 'admin_provider_approve' provider.id %}">
+                {% csrf_token %}
+                <button type="submit" class="fn-action-btn fn-action-approve" onclick="return confirm('Approve this provider?');">
+                    <i class="icofont-check-circled"></i> Approve Provider
+                </button>
+            </form>
+            {% endif %}
+            {% if provider.status == 'pending' %}
+            <form method="POST" action="{% url 'admin_provider_reject' provider.id %}">
+                {% csrf_token %}
+                <button type="submit" class="fn-action-btn fn-action-reject" onclick="return confirm('Reject this provider?');">
+                    <i class="icofont-close-circled"></i> Reject Provider
+                </button>
+            </form>
+            {% endif %}
+            {% if provider.status == 'approved' %}
+            <form method="POST" action="{% url 'admin_provider_suspend' provider.id %}">
+                {% csrf_token %}
+                <button type="submit" class="fn-action-btn fn-action-suspend" onclick="return confirm('Suspend this provider?');">
+                    <i class="icofont-pause"></i> Suspend Provider
+                </button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{% url 'admin_provider_delete' provider.id %}">
+                {% csrf_token %}
+                <button type="submit" class="fn-action-btn fn-action-delete" onclick="return confirm('Permanently delete this provider?');">
+                    <i class="icofont-ui-delete"></i> Delete Provider
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.fn-back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f3f4f6; border-radius: 8px; color: #374151; text-decoration: none; font-size: 14px; font-weight: 500; flex-shrink: 0; }
+.fn-back-btn:hover { background: #e5e7eb; color: #111827; }
+.fn-page-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 2px; }
+.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
+.fn-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.fn-detail-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
+.fn-detail-card-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid #f3f4f6; }
+.fn-detail-card-title { font-size: 15px; font-weight: 700; color: #111827; }
+.fn-info-list { padding: 8px 0; }
+.fn-info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px; border-bottom: 1px solid #f9fafb; }
+.fn-info-row:last-child { border-bottom: none; }
+.fn-info-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+.fn-info-value { font-size: 14px; color: #111827; font-weight: 600; text-align: right; }
+.fn-actions-list { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+.fn-action-btn { width: 100%; padding: 12px 20px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+.fn-action-btn:hover { opacity: 0.85; }
+.fn-action-approve { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.fn-action-reject { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.fn-action-suspend { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.fn-action-delete { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+@media (max-width: 768px) { .fn-detail-grid { grid-template-columns: 1fr; } }
+</style>
+
+{% endblock %}

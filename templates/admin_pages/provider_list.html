@@ -1,0 +1,130 @@
+{% extends "admin_pages/base.html" %}
+{% load static %}
+
+{% block title %}Providers | Admin Dashboard{% endblock %}
+{% block nav_providers %}active{% endblock %}
+
+{% block content %}
+
+<div class="fn-page-header">
+    <div>
+        <h1 class="fn-page-title">Providers</h1>
+        <p class="fn-page-sub">Manage all service providers on the platform</p>
+    </div>
+</div>
+
+{% if messages %}
+<div class="fn-messages">
+    {% for message in messages %}
+    <div class="fn-alert fn-alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="fn-table-card">
+    <div style="overflow-x: auto;">
+        <table class="fn-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Provider Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for provider in providers %}
+                <tr>
+                    <td>#{{ provider.id }}</td>
+                    <td><strong>{{ provider.user.get_full_name|default:provider.user.email }}</strong></td>
+                    <td>{{ provider.user.email }}</td>
+                    <td>{{ provider.user.phone|default:"-" }}</td>
+                    <td>{{ provider.category.name|default:"-" }}</td>
+                    <td>
+                        {% if provider.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif provider.status == 'approved' %}
+                            <span class="badge badge-success">Approved</span>
+                        {% elif provider.status == 'rejected' %}
+                            <span class="badge badge-danger">Rejected</span>
+                        {% elif provider.status == 'suspended' %}
+                            <span class="badge badge-secondary">Suspended</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ provider.created_at|date:"M d, Y" }}</td>
+                    <td class="fn-actions">
+                        <a href="{% url 'admin_provider_detail' provider.id %}" class="fn-btn fn-btn-view" title="View Details">
+                            <i class="icofont-eye-alt"></i>
+                        </a>
+                        {% if provider.status == 'pending' or provider.status == 'suspended' %}
+                        <form method="POST" action="{% url 'admin_provider_approve' provider.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="fn-btn fn-btn-approve" title="Approve" onclick="return confirm('Approve this provider?');">
+                                <i class="icofont-check"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if provider.status == 'pending' %}
+                        <form method="POST" action="{% url 'admin_provider_reject' provider.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="fn-btn fn-btn-reject" title="Reject" onclick="return confirm('Reject this provider?');">
+                                <i class="icofont-close"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if provider.status == 'approved' %}
+                        <form method="POST" action="{% url 'admin_provider_suspend' provider.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="fn-btn fn-btn-suspend" title="Suspend" onclick="return confirm('Suspend this provider?');">
+                                <i class="icofont-pause"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{% url 'admin_provider_delete' provider.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="fn-btn fn-btn-delete" title="Delete" onclick="return confirm('Permanently delete this provider?');">
+                                <i class="icofont-ui-delete"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center; padding: 32px; color: #9ca3af;">No providers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.fn-page-header { margin-bottom: 24px; }
+.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
+.fn-messages { margin-bottom: 16px; }
+.fn-alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+.fn-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.fn-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
+.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
+.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.fn-table tbody tr:last-child td { border-bottom: none; }
+.fn-table tbody tr:hover { background: #f9fafb; }
+.fn-actions { display: flex; align-items: center; gap: 6px; }
+.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: opacity 0.2s; }
+.fn-btn:hover { opacity: 0.8; }
+.fn-btn-view { background: #eff6ff; color: #2563eb; text-decoration: none; }
+.fn-btn-approve { background: #f0fdf4; color: #16a34a; }
+.fn-btn-reject { background: #fef2f2; color: #dc2626; }
+.fn-btn-suspend { background: #fffbeb; color: #d97706; }
+.fn-btn-delete { background: #fef2f2; color: #dc2626; }
+</style>
+
+{% endblock %}

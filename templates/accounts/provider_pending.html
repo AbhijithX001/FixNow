@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Account Under Review | FixNow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --navy:#050d1f; --blue:#2563eb; --blue2:#3b82f6;
+            --violet:#7c3aed; --violet2:#a855f7;
+        }
+        body {
+            font-family:'Inter',sans-serif; background:var(--navy); color:#fff;
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            padding:32px 16px; position:relative; overflow:hidden;
+        }
+        .bg-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; }
+        .orb-1 { width:500px; height:500px; background:radial-gradient(circle,rgba(37,99,235,0.2) 0%,transparent 70%); top:-15%; left:-10%; }
+        .orb-2 { width:400px; height:400px; background:radial-gradient(circle,rgba(245,158,11,0.12) 0%,transparent 70%); bottom:-10%; right:-10%; }
+        body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
+        .card {
+            background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.10);
+            border-radius:24px; padding:52px 44px; width:100%; max-width:480px;
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+            box-shadow:0 24px 64px rgba(0,0,0,0.5);
+            position:relative; z-index:1; text-align:center;
+            animation:fadeUp 0.5s ease both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .logo-link { font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; text-decoration:none; color:#fff; display:inline-block; margin-bottom:32px; }
+        .logo-link span { background:linear-gradient(135deg,var(--blue2),var(--violet2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .status-icon {
+            width:80px; height:80px; border-radius:24px; margin:0 auto 24px;
+            background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(251,146,60,0.2));
+            border:1px solid rgba(245,158,11,0.3);
+            display:flex; align-items:center; justify-content:center; font-size:36px;
+            animation:pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.3)} 50%{box-shadow:0 0 0 12px rgba(245,158,11,0)} }
+        .status-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(245,158,11,0.12); color:#fcd34d;
+            border:1px solid rgba(245,158,11,0.3);
+            border-radius:20px; padding:5px 16px; font-size:12px; font-weight:700;
+            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:20px;
+        }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:#fcd34d; animation:blink 1.5s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        h1 { font-family:'Outfit',sans-serif; font-size:26px; font-weight:800; margin-bottom:14px; letter-spacing:-0.5px; }
+        p { font-size:15px; color:rgba(255,255,255,0.5); line-height:1.7; max-width:360px; margin:0 auto 28px; }
+        .info-steps {
+            background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2);
+            border-radius:14px; padding:20px; margin-bottom:28px; text-align:left;
+        }
+        .info-step { display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
+        .info-step:last-child { margin-bottom:0; }
+        .step-num { width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--violet)); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; margin-top:1px; }
+        .step-text { font-size:13.5px; color:rgba(255,255,255,0.55); line-height:1.5; }
+        .btn-logout {
+            display:inline-flex; align-items:center; gap:8px;
+            padding:13px 32px; border-radius:10px; font-size:14px; font-weight:600;
+            text-decoration:none; border:1.5px solid rgba(255,255,255,0.15);
+            color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.04);
+            transition:all 0.2s; font-family:'Inter',sans-serif;
+        }
+        .btn-logout:hover { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.3); color:#fff; }
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+
+<div class="card">
+    <a href="{% url 'home' %}" class="logo-link">Fix<span>Now</span></a>
+
+    <div class="status-icon">⏳</div>
+    <div class="status-badge">
+        <div class="status-dot"></div>
+        Pending Review
+    </div>
+
+    <h1>Your account is under review</h1>
+    <p>Thank you for registering as a service provider on FixNow. Our team is reviewing your application and documents.</p>
+
+    <div class="info-steps">
+        <div class="info-step">
+            <div class="step-num">1</div>
+            <div class="step-text">Our admin team reviews your submitted profile and ID documents</div>
+        </div>
+        <div class="info-step">
+            <div class="step-num">2</div>
+            <div class="step-text">You'll receive an email once your account is approved or if more information is needed</div>
+        </div>
+        <div class="info-step">
+            <div class="step-num">3</div>
+            <div class="step-text">After approval, log back in to start accepting bookings from customers</div>
+        </div>
+    </div>
+
+    <a href="{% url 'user_logout' %}" class="btn-logout">Sign Out</a>
+</div>
+</body>
+</html>

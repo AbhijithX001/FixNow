@@ -1,0 +1,147 @@
+{% extends "provider/base.html" %}
+{% load static %}
+
+{% block title %}Booking Detail | FixNow Provider{% endblock %}
+{% block nav_bookings %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 600; flex-shrink: 0; transition: all 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+    .page-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin: 0; }
+    
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--glass-border); }
+    .card-title { font-size: 16px; font-weight: 700; color: #fff; }
+    
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-pending { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-confirmed { background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
+    .badge-in_progress { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+    .badge-completed { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-rejected, .badge-cancelled { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+    
+    .info-list { padding: 8px 0; }
+    .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); gap: 16px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13.5px; color: rgba(255,255,255,0.4); font-weight: 500; flex-shrink: 0; }
+    .info-value { font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 600; text-align: right; }
+    
+    .action-container { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .action-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .action-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .action-approve { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .action-reject { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+    .action-start { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    
+    .timeline { padding: 24px; display: flex; flex-direction: column; gap: 0; }
+    .timeline-item { display: flex; gap: 16px; padding-bottom: 24px; position: relative; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 7px; top: 16px; bottom: 0; width: 2px; background: rgba(37,99,235,0.2); }
+    .timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--violet)); flex-shrink: 0; margin-top: 3px; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .timeline-body { flex: 1; }
+    .timeline-status { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+    .timeline-meta { font-size: 12px; color: rgba(255,255,255,0.4); margin: 0; }
+    .timeline-note { font-size: 13px; color: rgba(255,255,255,0.6); margin: 6px 0 0; font-style: italic; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--glass-border); }
+    
+    @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; align-items:center; gap:20px;">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+    <div>
+        <h1 class="page-title">Booking #{{ booking.id }}</h1>
+        <p class="page-sub">Review and update this booking</p>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div class="glass-card" style="padding:0; overflow:hidden;">
+        <div class="card-header">
+            <span class="card-title">Booking Information</span>
+            <span class="badge badge-{{ booking.status }}">
+                {% if booking.status == 'pending' %}New Request
+                {% elif booking.status == 'in_progress' %}In Progress
+                {% else %}{{ booking.status|title }}
+                {% endif %}
+            </span>
+        </div>
+        <div class="info-list">
+            <div class="info-row"><span class="info-label">Customer</span><span class="info-value">{{ booking.customer.get_full_name|default:booking.customer.email }}</span></div>
+            <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ booking.customer.phone|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Service</span><span class="info-value">{{ booking.category.name|default:"-" }}</span></div>
+            <div class="info-row"><span class="info-label">Date</span><span class="info-value">{{ booking.scheduled_date|date:"F d, Y" }}</span></div>
+            <div class="info-row"><span class="info-label">Time</span><span class="info-value">{{ booking.scheduled_time }}</span></div>
+            <div class="info-row"><span class="info-label">Address</span><span class="info-value">{{ booking.address }}</span></div>
+            <div class="info-row"><span class="info-label">Pincode</span><span class="info-value">{{ booking.pincode }}</span></div>
+            <div class="info-row"><span class="info-label">Description</span><span class="info-value">{{ booking.description }}</span></div>
+            <div class="info-row"><span class="info-label">Booked On</span><span class="info-value">{{ booking.created_at|date:"F d, Y h:i A" }}</span></div>
+        </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <div class="glass-card" style="padding:0; overflow:hidden;">
+            <div class="card-header"><span class="card-title">Actions</span></div>
+            <div class="action-container">
+                {% if booking.status == 'pending' %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept">
+                    <button type="submit" class="action-btn action-approve">Accept Booking</button>
+                </form>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="action-btn action-reject" onclick="return confirm('Reject this booking?');">Reject Booking</button>
+                </form>
+                {% endif %}
+
+                {% if booking.status == 'confirmed' %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="start">
+                    <button type="submit" class="action-btn action-start">Mark as Started</button>
+                </form>
+                {% endif %}
+
+                {% if booking.status == 'in_progress' %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="complete">
+                    <button type="submit" class="action-btn action-approve" onclick="return confirm('Mark this job as completed?');">Mark as Completed</button>
+                </form>
+                {% endif %}
+
+                {% if booking.status in 'completed,rejected,cancelled' %}
+                <p style="color:rgba(255,255,255,0.4); font-size:14px; text-align:center;">No actions available for this booking.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="glass-card" style="padding:0; overflow:hidden;">
+            <div class="card-header"><span class="card-title">Status Timeline</span></div>
+            <div class="timeline">
+                {% for log in status_logs %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <p class="timeline-status">{{ log.status|title }}</p>
+                        <p class="timeline-meta">{{ log.timestamp|date:"M d, Y h:i A" }}</p>
+                        {% if log.note %}
+                        <p class="timeline-note">{{ log.note }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color:rgba(255,255,255,0.4); font-size:14px; text-align:center;">No status history yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "admin_pages/base.html" %}
+{% load static %}
+
+{% block title %}Pincodes | Admin Dashboard{% endblock %}
+{% block nav_pincodes %}active{% endblock %}
+
+{% block content %}
+
+<div class="fn-page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div>
+        <h1 class="fn-page-title">Service Pincodes</h1>
+        <p class="fn-page-sub">Manage the areas FixNow currently serves</p>
+    </div>
+    <button class="fn-add-btn" onclick="document.getElementById('addModal').style.display='flex'">
+        <i class="icofont-plus"></i> Add Pincode
+    </button>
+</div>
+
+{% if messages %}
+<div class="fn-messages">
+    {% for message in messages %}
+    <div class="fn-alert fn-alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="fn-table-card">
+    <div style="overflow-x:auto;">
+        <table class="fn-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Pincode</th>
+                    <th>Area Name</th>
+                    <th>District</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pin in pincodes %}
+                <tr>
+                    <td>#{{ pin.id }}</td>
+                    <td><strong>{{ pin.pincode }}</strong></td>
+                    <td>{{ pin.area_name }}</td>
+                    <td>{{ pin.district }}</td>
+                    <td class="fn-actions">
+                        <button class="fn-btn fn-btn-view"
+                            onclick="openEditModal({{ pin.id }}, '{{ pin.pincode|escapejs }}', '{{ pin.area_name|escapejs }}', '{{ pin.district|escapejs }}')"
+                            title="Edit">
+                            <i class="icofont-edit"></i>
+                        </button>
+                        <button class="fn-btn fn-btn-delete"
+                            onclick="openDeleteModal({{ pin.id }}, '{{ pin.pincode|escapejs }}')"
+                            title="Delete">
+                            <i class="icofont-ui-delete"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:32px; color:#9ca3af;">No pincodes yet. Add one above.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="fn-modal-overlay" id="addModal" style="display:none;">
+    <div class="fn-modal">
+        <div class="fn-modal-header">
+            <span class="fn-modal-title">Add Pincode</span>
+            <button class="fn-modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div class="fn-modal-body">
+                <div class="fn-field">
+                    <label class="fn-label">Pincode *</label>
+                    <input type="text" name="pincode" class="fn-input" placeholder="e.g. 673001" required>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">Area Name *</label>
+                    <input type="text" name="area_name" class="fn-input" placeholder="e.g. Calicut" required>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">District *</label>
+                    <input type="text" name="district" class="fn-input" placeholder="e.g. Kozhikode" required>
+                </div>
+            </div>
+            <div class="fn-modal-footer">
+                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
+                <button type="submit" class="fn-btn-submit">Add Pincode</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="fn-modal-overlay" id="editModal" style="display:none;">
+    <div class="fn-modal">
+        <div class="fn-modal-header">
+            <span class="fn-modal-title">Edit Pincode</span>
+            <button class="fn-modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="pincode_id" id="edit_pincode_id">
+            <div class="fn-modal-body">
+                <div class="fn-field">
+                    <label class="fn-label">Pincode *</label>
+                    <input type="text" name="pincode" id="edit_pincode" class="fn-input" required>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">Area Name *</label>
+                    <input type="text" name="area_name" id="edit_area_name" class="fn-input" required>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">District *</label>
+                    <input type="text" name="district" id="edit_district" class="fn-input" required>
+                </div>
+            </div>
+            <div class="fn-modal-footer">
+                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+                <button type="submit" class="fn-btn-submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="fn-modal-overlay" id="deleteModal" style="display:none;">
+    <div class="fn-modal fn-modal-sm">
+        <div class="fn-modal-header">
+            <span class="fn-modal-title">Delete Pincode</span>
+            <button class="fn-modal-close" onclick="document.getElementById('deleteModal').style.display='none'">&times;</button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="pincode_id" id="delete_pincode_id">
+            <div class="fn-modal-body">
+                <p style="color:#374151; font-size:15px;">Delete pincode <strong id="delete_pincode_val"></strong>? This cannot be undone.</p>
+            </div>
+            <div class="fn-modal-footer">
+                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
+                <button type="submit" class="fn-btn-delete-confirm">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
+.fn-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.fn-add-btn:hover { background: #1d4ed8; }
+.fn-messages { margin-bottom: 16px; }
+.fn-alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+.fn-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.fn-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
+.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
+.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.fn-table tbody tr:last-child td { border-bottom: none; }
+.fn-table tbody tr:hover { background: #f9fafb; }
+.fn-actions { display: flex; gap: 6px; }
+.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+.fn-btn-view { background: #eff6ff; color: #2563eb; }
+.fn-btn-delete { background: #fef2f2; color: #dc2626; }
+.fn-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.fn-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.fn-modal-sm { max-width: 380px; }
+.fn-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.fn-modal-title { font-size: 16px; font-weight: 700; color: #111827; }
+.fn-modal-close { background: none; border: none; font-size: 22px; color: #9ca3af; cursor: pointer; }
+.fn-modal-body { padding: 20px 24px; }
+.fn-field { margin-bottom: 16px; }
+.fn-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.fn-input { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #111827; box-sizing: border-box; }
+.fn-input:focus { outline: none; border-color: #2563eb; }
+.fn-modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #f3f4f6; }
+.fn-btn-cancel { padding: 9px 18px; background: #f3f4f6; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; }
+.fn-btn-submit { padding: 9px 18px; background: #2563eb; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
+.fn-btn-delete-confirm { padding: 9px 18px; background: #dc2626; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
+</style>
+
+<script>
+function openEditModal(id, pincode, area, district) {
+    document.getElementById('edit_pincode_id').value = id;
+    document.getElementById('edit_pincode').value = pincode;
+    document.getElementById('edit_area_name').value = area;
+    document.getElementById('edit_district').value = district;
+    document.getElementById('editModal').style.display = 'flex';
+}
+function openDeleteModal(id, pincode) {
+    document.getElementById('delete_pincode_id').value = id;
+    document.getElementById('delete_pincode_val').textContent = pincode;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+</script>
+
+{% endblock %}

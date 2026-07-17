@@ -1,0 +1,55 @@
+{% extends "provider/base.html" %}
+{% load static %}
+
+{% block title %}Notifications | FixNow Provider{% endblock %}
+{% block nav_notifications %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+    .page-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin: 0; }
+    
+    .notif-container { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+    
+    .notif-item { display: flex; gap: 16px; padding: 20px 24px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; align-items: flex-start; transition: all 0.2s; }
+    .notif-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    
+    .notif-unread { background: rgba(37,99,235,0.1); border-color: rgba(37,99,235,0.3); }
+    .notif-unread:hover { background: rgba(37,99,235,0.15); border-color: rgba(37,99,235,0.4); }
+    
+    .notif-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+    
+    .notif-body { flex: 1; }
+    .notif-msg { font-size: 14.5px; color: rgba(255,255,255,0.9); font-weight: 500; margin: 0 0 6px; line-height: 1.5; }
+    .notif-time { font-size: 12.5px; color: rgba(255,255,255,0.4); margin: 0; display: flex; align-items: center; gap: 6px; }
+    .notif-time::before { content: '⏱'; font-size: 11px; }
+    
+    .empty-state { padding: 48px 24px; text-align: center; color: rgba(255,255,255,0.4); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; font-size: 15px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div>
+    <h1 class="page-title">Notifications</h1>
+    <p class="page-sub">Your recent activity and updates</p>
+</div>
+
+<div class="notif-container">
+    {% for notif in notifications %}
+    <div class="notif-item {% if not notif.is_read %}notif-unread{% endif %}">
+        <div class="notif-icon">🔔</div>
+        <div class="notif-body">
+            <p class="notif-msg">{{ notif.message }}</p>
+            <p class="notif-time">{{ notif.created_at|timesince }} ago</p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <div style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;">📭</div>
+        No notifications yet. You're all caught up!
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

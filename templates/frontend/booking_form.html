@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Book {{ provider.user.get_full_name }} | FixNow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        :root { --navy:#050d1f; --blue:#2563eb; --blue2:#3b82f6; --violet:#7c3aed; --violet2:#a855f7; --glass-bg:rgba(255,255,255,0.04); --glass-border:rgba(255,255,255,0.09); --input-bg:rgba(255,255,255,0.06); --input-border:rgba(255,255,255,0.13); }
+        body { font-family:'Inter',sans-serif; background:var(--navy); color:#fff; min-height:100vh; position:relative; overflow-x:hidden; }
+        .bg-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; }
+        .orb-1 { width:500px; height:500px; background:radial-gradient(circle,rgba(37,99,235,0.15) 0%,transparent 70%); top:-15%; left:-10%; }
+        .orb-2 { width:300px; height:300px; background:radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 70%); bottom:5%; right:5%; }
+        .navbar { position:sticky; top:0; z-index:100; height:64px; display:flex; align-items:center; padding:0 44px; justify-content:space-between; background:rgba(5,13,31,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--glass-border); }
+        .logo { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; text-decoration:none; color:#fff; }
+        .logo span { background:linear-gradient(135deg,var(--blue2),var(--violet2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .content { max-width:680px; margin:0 auto; padding:36px 40px; position:relative; z-index:1; }
+        .back-link { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,0.4); text-decoration:none; font-size:13.5px; margin-bottom:24px; transition:color 0.2s; }
+        .back-link:hover { color:rgba(255,255,255,0.7); }
+        .alert { padding:11px 14px; border-radius:10px; margin-bottom:16px; font-size:13.5px; display:flex; gap:8px; align-items:center; background:rgba(220,38,38,0.15); color:#fca5a5; border:1px solid rgba(220,38,38,0.3); }
+        .card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:18px; overflow:hidden; }
+        .card-header { padding:18px 24px; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .card-header h2 { font-family:'Outfit',sans-serif; font-size:18px; font-weight:700; color:#fff; }
+        .card-body { padding:24px; }
+        .provider-info { display:flex; gap:14px; align-items:flex-start; margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .provider-avatar { width:54px; height:54px; border-radius:14px; background:linear-gradient(135deg,var(--blue),var(--violet)); display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; color:#fff; flex-shrink:0; }
+        .provider-name { font-family:'Outfit',sans-serif; font-size:17px; font-weight:700; color:#fff; margin-bottom:4px; }
+        .provider-cat { font-size:13px; color:var(--blue2); font-weight:600; margin-bottom:3px; }
+        .provider-exp { font-size:12px; color:rgba(255,255,255,0.35); }
+        .form-group { margin-bottom:18px; }
+        .form-label { display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,0.65); margin-bottom:7px; }
+        .form-input { width:100%; padding:11px 14px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:10px; font-size:14px; color:#fff; outline:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
+        .form-input::placeholder { color:rgba(255,255,255,0.25); }
+        .form-input:focus { border-color:rgba(37,99,235,0.55); background:rgba(255,255,255,0.08); box-shadow:0 0 0 3px rgba(37,99,235,0.12); }
+        /* date/time inputs dark fix */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator { filter:invert(0.7); cursor:pointer; }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .btn-submit { width:100%; padding:14px; background:linear-gradient(135deg,var(--blue),var(--violet)); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px; font-family:'Inter',sans-serif; transition:all 0.25s; box-shadow:0 4px 20px rgba(37,99,235,0.35); }
+        .btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(37,99,235,0.5); filter:brightness(1.08); }
+        @media(max-width:600px) { .navbar { padding:0 20px; } .content { padding:24px 16px; } .two-col { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="logo">Fix<span>Now</span></a>
+</nav>
+
+<div class="content">
+    <a href="javascript:history.back()" class="back-link">← Back</a>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert">⚠️ {{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header"><h2>Book a Service</h2></div>
+        <div class="card-body">
+            <div class="provider-info">
+                <div class="provider-avatar">{{ provider.user.get_full_name|first|upper }}</div>
+                <div>
+                    <div class="provider-name">{{ provider.user.get_full_name }}</div>
+                    <div class="provider-cat">{{ provider.category.name }}</div>
+                    <div class="provider-exp">{{ provider.experience_years }} years experience</div>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="two-col">
+                    <div class="form-group">
+                        <label class="form-label">Preferred Date *</label>
+                        <input type="date" name="scheduled_date" class="form-input" required min="{{ today }}"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred Time *</label>
+                        <input type="time" name="scheduled_time" class="form-input" required/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Address *</label>
+                    <textarea name="address" class="form-input" rows="3" placeholder="House number, street, landmark..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Pincode *</label>
+                    <input type="text" name="pincode" class="form-input" placeholder="e.g. 673001" required maxlength="10"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Describe the problem *</label>
+                    <textarea name="description" class="form-input" rows="4" placeholder="e.g. Kitchen tap is leaking, bathroom drain is blocked..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Confirm Booking →</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

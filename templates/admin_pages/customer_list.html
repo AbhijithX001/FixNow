@@ -1,0 +1,101 @@
+{% extends "admin_pages/base.html" %}
+{% load static %}
+
+{% block title %}Customers | Admin Dashboard{% endblock %}
+{% block nav_customers %}active{% endblock %}
+
+{% block content %}
+
+<div class="fn-page-header">
+    <div>
+        <h1 class="fn-page-title">Customers</h1>
+        <p class="fn-page-sub">Manage all registered customers on the platform</p>
+    </div>
+</div>
+
+{% if messages %}
+<div class="fn-messages">
+    {% for message in messages %}
+    <div class="fn-alert fn-alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="fn-table-card">
+    <div style="overflow-x: auto;">
+        <table class="fn-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Pincode</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>#{{ customer.id }}</td>
+                    <td>{{ customer.user.email }}</td>
+                    <td>{{ customer.user.phone|default:"-" }}</td>
+                    <td>{{ customer.pincode.pincode|default:"-" }}</td>
+                    <td>{{ customer.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if customer.user.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Blocked</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'admin_customer_block' customer.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            {% if customer.user.is_active %}
+                                <button type="submit" class="fn-btn fn-btn-suspend" title="Block" onclick="return confirm('Block this customer?');">
+                                    <i class="icofont-ban"></i>
+                                </button>
+                            {% else %}
+                                <button type="submit" class="fn-btn fn-btn-approve" title="Unblock" onclick="return confirm('Unblock this customer?');">
+                                    <i class="icofont-check"></i>
+                                </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; padding:32px; color:#9ca3af;">No customers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.fn-page-header { margin-bottom: 24px; }
+.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
+.fn-messages { margin-bottom: 16px; }
+.fn-alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+.fn-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.fn-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.fn-alert-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
+.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
+.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.fn-table tbody tr:last-child td { border-bottom: none; }
+.fn-table tbody tr:hover { background: #f9fafb; }
+.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: opacity 0.2s; }
+.fn-btn:hover { opacity: 0.8; }
+.fn-btn-approve { background: #f0fdf4; color: #16a34a; }
+.fn-btn-suspend { background: #fffbeb; color: #d97706; }
+.fn-btn-delete { background: #fef2f2; color: #dc2626; }
+</style>
+
+{% endblock %}
