@@ -1,218 +1,126 @@
 {% extends "admin_pages/base.html" %}
-{% load static %}
 
-{% block title %}Categories | Admin Dashboard{% endblock %}
+{% block title %}Services | FixNow Admin{% endblock %}
 {% block nav_categories %}active{% endblock %}
 
 {% block content %}
-
-<div class="fn-page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-    <div>
-        <h1 class="fn-page-title">Service Categories</h1>
-        <p class="fn-page-sub">Manage the service categories available on FixNow</p>
+<div class="fn-page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px;">
+        <div>
+            <h1 class="fn-display fn-display-sm">Service Categories</h1>
+            <p class="fn-page-sub">Manage the types of services providers can offer.</p>
+        </div>
     </div>
-    <button class="fn-add-btn" onclick="document.getElementById('addModal').style.display='flex'">
-        <i class="icofont-plus"></i> Add Category
-    </button>
 </div>
 
-{% if messages %}
-<div class="fn-messages">
-    {% for message in messages %}
-    <div class="fn-alert fn-alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<div class="fn-table-card">
-    <div style="overflow-x:auto;">
+<div class="fn-two-col" style="align-items: flex-start; gap: 40px; grid-template-columns: 1fr 340px;">
+    
+    <!-- Left: List -->
+    <div class="fn-table-wrap">
         <table class="fn-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
+                    <th>Category Name</th>
                     <th>Slug</th>
-                    <th>Providers</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for category in categories %}
                 <tr>
-                    <td>#{{ category.id }}</td>
-                    <td><strong>{{ category.name }}</strong></td>
-                    <td><code>{{ category.slug }}</code></td>
-                    <td>{{ category.providers.count }}</td>
                     <td>
-                        {% if category.is_active %}
-                            <span class="badge badge-success">Active</span>
-                        {% else %}
-                            <span class="badge badge-danger">Inactive</span>
+                        <strong style="color: var(--fn-text-1);">{{ category.name }}</strong>
+                        {% if category.description %}
+                        <br><small style="color: var(--fn-text-3);">{{ category.description|truncatechars:50 }}</small>
                         {% endif %}
                     </td>
-                    <td class="fn-actions">
-                        <button class="fn-btn fn-btn-view"
-                            onclick="openEditModal({{ category.id }}, '{{ category.name|escapejs }}', '{{ category.description|escapejs }}', {{ category.is_active|yesno:'true,false' }})"
-                            title="Edit">
-                            <i class="icofont-edit"></i>
-                        </button>
-                        <button class="fn-btn fn-btn-delete"
-                            onclick="openDeleteModal({{ category.id }}, '{{ category.name|escapejs }}')"
-                            title="Delete">
-                            <i class="icofont-ui-delete"></i>
-                        </button>
+                    <td style="color: var(--fn-text-3);">{{ category.slug }}</td>
+                    <td>
+                        {% if category.is_active %}
+                            <span class="fn-badge fn-badge-approved">Active</span>
+                        {% else %}
+                            <span class="fn-badge fn-badge-rejected">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="fn-btn fn-btn-ghost fn-btn-sm" onclick="editCategory('{{ category.id }}', '{{ category.name|escapejs }}', '{{ category.description|escapejs }}', {% if category.is_active %}true{% else %}false{% endif %})">Edit</button>
+                        
+                        <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this category completely?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="category_id" value="{{ category.id }}">
+                            <button type="submit" class="fn-btn fn-btn-ghost fn-btn-sm" style="color: #ef4444; border-color: transparent;">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="text-align:center; padding:32px; color:#9ca3af;">No categories yet. Add one above.</td>
+                    <td colspan="4" class="fn-empty" style="padding: 60px 20px;">
+                        <div class="fn-empty-sub">No categories created yet.</div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
 
-<!-- Add Modal -->
-<div class="fn-modal-overlay" id="addModal" style="display:none;">
-    <div class="fn-modal">
-        <div class="fn-modal-header">
-            <span class="fn-modal-title">Add Category</span>
-            <button class="fn-modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
-        </div>
-        <form method="POST">
+    <!-- Right: Form -->
+    <div class="fn-card" id="categoryFormCard" style="position: sticky; top: 120px;">
+        <h3 class="fn-display" style="font-size: 18px; margin-bottom: 24px;" id="formTitle">Add New Category</h3>
+        
+        <form method="POST" id="categoryForm">
             {% csrf_token %}
-            <input type="hidden" name="action" value="add">
-            <div class="fn-modal-body">
-                <div class="fn-field">
-                    <label class="fn-label">Category Name *</label>
-                    <input type="text" name="name" class="fn-input" placeholder="e.g. Plumbing" required>
-                </div>
-                <div class="fn-field">
-                    <label class="fn-label">Description</label>
-                    <textarea name="description" class="fn-input" rows="3" placeholder="Short description..."></textarea>
-                </div>
-                <div class="fn-field fn-field-inline">
-                    <input type="checkbox" name="is_active" id="add_is_active" checked>
-                    <label for="add_is_active">Active (visible to providers)</label>
-                </div>
+            <input type="hidden" name="action" value="add" id="formAction">
+            <input type="hidden" name="category_id" value="" id="formCategoryId">
+            
+            <div class="fn-field">
+                <label class="fn-label">Name</label>
+                <input type="text" name="name" id="catName" class="fn-input" required>
             </div>
-            <div class="fn-modal-footer">
-                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
-                <button type="submit" class="fn-btn-submit">Add Category</button>
+            
+            <div class="fn-field">
+                <label class="fn-label">Description (Optional)</label>
+                <textarea name="description" id="catDesc" class="fn-input" rows="3"></textarea>
+            </div>
+            
+            <label style="display: flex; align-items: center; gap: 10px; padding: 16px; border: 1px solid var(--fn-border); border-radius: 10px; cursor: pointer; background: #202020; margin-bottom: 24px;">
+                <input type="checkbox" name="is_active" id="catActive" checked style="width: 16px; height: 16px; accent-color: var(--fn-accent-dark);">
+                <span style="font-size:14px; font-weight:600; color: var(--fn-text-1);">Active (visible to users)</span>
+            </label>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="fn-btn fn-btn-primary" style="flex: 1;" id="formSubmitBtn">Add Category</button>
+                <button type="button" class="fn-btn fn-btn-ghost" style="display: none;" id="formCancelBtn" onclick="resetForm()">Cancel</button>
             </div>
         </form>
     </div>
 </div>
-
-<!-- Edit Modal -->
-<div class="fn-modal-overlay" id="editModal" style="display:none;">
-    <div class="fn-modal">
-        <div class="fn-modal-header">
-            <span class="fn-modal-title">Edit Category</span>
-            <button class="fn-modal-close" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
-        </div>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="category_id" id="edit_category_id">
-            <div class="fn-modal-body">
-                <div class="fn-field">
-                    <label class="fn-label">Category Name *</label>
-                    <input type="text" name="name" id="edit_name" class="fn-input" required>
-                </div>
-                <div class="fn-field">
-                    <label class="fn-label">Description</label>
-                    <textarea name="description" id="edit_description" class="fn-input" rows="3"></textarea>
-                </div>
-                <div class="fn-field fn-field-inline">
-                    <input type="checkbox" name="is_active" id="edit_is_active">
-                    <label for="edit_is_active">Active</label>
-                </div>
-            </div>
-            <div class="fn-modal-footer">
-                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
-                <button type="submit" class="fn-btn-submit">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Delete Modal -->
-<div class="fn-modal-overlay" id="deleteModal" style="display:none;">
-    <div class="fn-modal fn-modal-sm">
-        <div class="fn-modal-header">
-            <span class="fn-modal-title">Delete Category</span>
-            <button class="fn-modal-close" onclick="document.getElementById('deleteModal').style.display='none'">&times;</button>
-        </div>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="category_id" id="delete_category_id">
-            <div class="fn-modal-body">
-                <p style="color:#374151; font-size:15px;">Are you sure you want to delete <strong id="delete_category_name"></strong>? This cannot be undone.</p>
-            </div>
-            <div class="fn-modal-footer">
-                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
-                <button type="submit" class="fn-btn-delete-confirm">Delete</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<style>
-.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
-.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
-.fn-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.fn-add-btn:hover { background: #1d4ed8; }
-.fn-messages { margin-bottom: 16px; }
-.fn-alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
-.fn-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.fn-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
-.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
-.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
-.fn-table tbody tr:last-child td { border-bottom: none; }
-.fn-table tbody tr:hover { background: #f9fafb; }
-.fn-table code { background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #6b7280; }
-.fn-actions { display: flex; gap: 6px; align-items: center; }
-.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
-.fn-btn-view { background: #eff6ff; color: #2563eb; }
-.fn-btn-delete { background: #fef2f2; color: #dc2626; }
-.fn-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.fn-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.fn-modal-sm { max-width: 380px; }
-.fn-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
-.fn-modal-title { font-size: 16px; font-weight: 700; color: #111827; }
-.fn-modal-close { background: none; border: none; font-size: 22px; color: #9ca3af; cursor: pointer; line-height: 1; }
-.fn-modal-body { padding: 20px 24px; }
-.fn-field { margin-bottom: 16px; }
-.fn-field-inline { display: flex; align-items: center; gap: 8px; }
-.fn-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-.fn-input { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #111827; box-sizing: border-box; }
-.fn-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-.fn-modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #f3f4f6; }
-.fn-btn-cancel { padding: 9px 18px; background: #f3f4f6; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; }
-.fn-btn-submit { padding: 9px 18px; background: #2563eb; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
-.fn-btn-delete-confirm { padding: 9px 18px; background: #dc2626; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
-</style>
 
 <script>
-function openEditModal(id, name, description, isActive) {
-    document.getElementById('edit_category_id').value = id;
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_description').value = description;
-    document.getElementById('edit_is_active').checked = isActive;
-    document.getElementById('editModal').style.display = 'flex';
-}
-function openDeleteModal(id, name) {
-    document.getElementById('delete_category_id').value = id;
-    document.getElementById('delete_category_name').textContent = name;
-    document.getElementById('deleteModal').style.display = 'flex';
-}
+    function editCategory(id, name, desc, isActive) {
+        document.getElementById('formTitle').innerText = 'Edit Category';
+        document.getElementById('formAction').value = 'edit';
+        document.getElementById('formCategoryId').value = id;
+        document.getElementById('catName').value = name;
+        document.getElementById('catDesc').value = desc;
+        document.getElementById('catActive').checked = isActive;
+        
+        document.getElementById('formSubmitBtn').innerText = 'Save Changes';
+        document.getElementById('formCancelBtn').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+    
+    function resetForm() {
+        document.getElementById('formTitle').innerText = 'Add New Category';
+        document.getElementById('formAction').value = 'add';
+        document.getElementById('formCategoryId').value = '';
+        document.getElementById('catName').value = '';
+        document.getElementById('catDesc').value = '';
+        document.getElementById('catActive').checked = true;
+        
+        document.getElementById('formSubmitBtn').innerText = 'Add Category';
+        document.getElementById('formCancelBtn').style.display = 'none';
+    }
 </script>
-
 {% endblock %}

@@ -1,155 +1,111 @@
 {% extends "admin_pages/base.html" %}
 {% load static %}
 
-{% block title %}Booking Detail | Admin Dashboard{% endblock %}
+{% block title %}Booking #{{ booking.id }} | FixNow Admin{% endblock %}
 {% block nav_bookings %}active{% endblock %}
 
 {% block content %}
+<a href="javascript:history.back()" class="fn-back">← Back to Bookings</a>
 
-<div class="fn-page-header" style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-    <a href="{% url 'admin_booking_list' %}" class="fn-back-btn">
-        <i class="icofont-arrow-left"></i> Back
-    </a>
-    <div>
-        <h1 class="fn-page-title">Booking #{{ booking.id }}</h1>
-        <p class="fn-page-sub">Full booking details and status history</p>
-    </div>
+<div class="fn-page-header">
+    <span class="fn-section-label">Booking Details</span>
+    <h1 class="fn-display fn-display-sm">Booking #{{ booking.id }}</h1>
 </div>
 
-<div class="fn-detail-grid">
-
-    <div class="fn-detail-card">
-        <div class="fn-detail-card-header">
-            <span class="fn-detail-card-title">Booking Information</span>
-            {% if booking.status == 'pending' %}
-                <span class="badge badge-warning">Pending</span>
-            {% elif booking.status == 'confirmed' %}
-                <span class="badge badge-primary">Confirmed</span>
-            {% elif booking.status == 'in_progress' %}
-                <span class="badge badge-secondary">In Progress</span>
-            {% elif booking.status == 'completed' %}
-                <span class="badge badge-success">Completed</span>
-            {% elif booking.status == 'rejected' %}
-                <span class="badge badge-danger">Rejected</span>
-            {% elif booking.status == 'cancelled' %}
-                <span class="badge badge-danger">Cancelled</span>
-            {% endif %}
+<div class="fn-two-col" style="align-items: flex-start; gap: 40px;">
+    
+    <!-- Left Column: Details -->
+    <div style="display: flex; flex-direction: column; gap: 40px;">
+        <div class="fn-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px; border-bottom: 1px solid var(--fn-border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="fn-display" style="font-size: 18px;">Information</h3>
+                <span class="fn-badge fn-badge-{{ booking.status }}">
+                    {{ booking.status|title }}
+                </span>
+            </div>
+            <div style="padding: 12px 24px;">
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Customer</span>
+                    <span class="fn-info-value">{{ booking.customer.get_full_name|default:booking.customer.email }}</span>
+                </div>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Provider</span>
+                    <span class="fn-info-value">{{ booking.provider.user.get_full_name|default:booking.provider.user.email }}</span>
+                </div>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Service Category</span>
+                    <span class="fn-info-value">{{ booking.category.name }}</span>
+                </div>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Scheduled For</span>
+                    <span class="fn-info-value">{{ booking.scheduled_date|date:"F d, Y" }} at {{ booking.scheduled_time }}</span>
+                </div>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Address</span>
+                    <span class="fn-info-value">{{ booking.address }}</span>
+                </div>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Pincode</span>
+                    <span class="fn-info-value">{{ booking.pincode }}</span>
+                </div>
+                <div class="fn-info-row" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="fn-info-label">Description</span>
+                    <span class="fn-info-value" style="max-width: 300px; text-align: right;">{{ booking.description }}</span>
+                </div>
+            </div>
         </div>
-        <div class="fn-info-list">
-            <div class="fn-info-row">
-                <span class="fn-info-label">Customer</span>
-                <span class="fn-info-value">{{ booking.customer.email }}</span>
+        
+        <div class="fn-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px; border-bottom: 1px solid var(--fn-border);">
+                <h3 class="fn-display" style="font-size: 18px;">Status Timeline</h3>
             </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Provider</span>
-                <span class="fn-info-value">{{ booking.provider.user.email }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Category</span>
-                <span class="fn-info-value">{{ booking.category.name|default:"-" }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Scheduled Date</span>
-                <span class="fn-info-value">{{ booking.scheduled_date|date:"F d, Y" }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Scheduled Time</span>
-                <span class="fn-info-value">{{ booking.scheduled_time }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Address</span>
-                <span class="fn-info-value">{{ booking.address }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Pincode</span>
-                <span class="fn-info-value">{{ booking.pincode }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Description</span>
-                <span class="fn-info-value">{{ booking.description }}</span>
-            </div>
-            <div class="fn-info-row">
-                <span class="fn-info-label">Created</span>
-                <span class="fn-info-value">{{ booking.created_at|date:"F d, Y, h:i A" }}</span>
+            <div class="fn-timeline" style="padding: 24px;">
+                {% for log in status_logs %}
+                <div class="fn-timeline-item">
+                    <div class="fn-timeline-dot"></div>
+                    <div>
+                        <p class="fn-timeline-status" style="color: var(--fn-text-1);">{{ log.status|title }}</p>
+                        <p class="fn-timeline-meta" style="color: var(--fn-text-3);">{{ log.timestamp|date:"M d, Y h:i A" }} by {{ log.changed_by.get_full_name|default:log.changed_by.email }}</p>
+                        {% if log.note %}
+                        <p class="fn-timeline-note" style="color: var(--fn-text-2);">{{ log.note }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color:var(--fn-text-3); font-size:14px; text-align:center;">No status history yet.</p>
+                {% endfor %}
             </div>
         </div>
     </div>
 
-    <div class="fn-detail-card">
-        <div class="fn-detail-card-header">
-            <span class="fn-detail-card-title">Status Timeline</span>
-        </div>
-        <div class="fn-timeline">
-            {% for log in status_logs %}
-            <div class="fn-timeline-item">
-                <div class="fn-timeline-dot"></div>
-                <div class="fn-timeline-body">
-                    <p class="fn-timeline-status">{{ log.status|title }}</p>
-                    <p class="fn-timeline-meta">
-                        by {{ log.changed_by.email|default:"System" }} &nbsp;·&nbsp;
-                        {{ log.timestamp|date:"M d, Y h:i A" }}
-                    </p>
-                    {% if log.note %}
-                    <p class="fn-timeline-note">{{ log.note }}</p>
-                    {% endif %}
-                </div>
+    <!-- Right Column: Admin Actions -->
+    <div style="display: flex; flex-direction: column; gap: 40px;">
+        <div class="fn-card" style="padding: 0; overflow: hidden; border-color: var(--fn-accent-dark);">
+            <div style="padding: 24px; border-bottom: 1px solid var(--fn-border);">
+                <h3 class="fn-display" style="font-size: 18px; color: var(--fn-accent);">Admin Actions</h3>
             </div>
-            {% empty %}
-            <p style="color:#9ca3af; font-size:14px; padding:20px;">No status history yet.</p>
-            {% endfor %}
+            <div style="padding: 24px;">
+                <p style="margin-bottom: 16px; font-size: 14px; color: var(--fn-text-2);">Force update the status of this booking. This will notify both the customer and the provider.</p>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="fn-field">
+                        <label class="fn-label">New Status</label>
+                        <select name="status" class="fn-select" required>
+                            <option value="">Select Status...</option>
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if booking.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="fn-field">
+                        <label class="fn-label">Admin Note (Optional)</label>
+                        <textarea name="note" class="fn-input" rows="3" placeholder="Reason for status change..."></textarea>
+                    </div>
+                    <button type="submit" class="fn-btn fn-btn-primary fn-btn-full" onclick="return confirm('Update booking status?');">Update Status</button>
+                </form>
+            </div>
         </div>
     </div>
-
-    <div class="fn-detail-card" style="grid-column: 1 / -1;">
-        <div class="fn-detail-card-header">
-            <span class="fn-detail-card-title">Admin Status Management</span>
-        </div>
-        <form method="POST" style="padding: 20px 22px;">
-            {% csrf_token %}
-            <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 200px;">
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Update Booking Status</label>
-                    <select name="status" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; color: #111827; background: #fff;">
-                        {% for code, name in status_choices %}
-                            <option value="{{ code }}" {% if booking.status == code %}selected{% endif %}>{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="flex: 2; min-width: 250px;">
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Reason / Note (Optional)</label>
-                    <input type="text" name="note" placeholder="Reason for status change..." style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; color: #111827;">
-                </div>
-                <button type="submit" style="padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Update Status</button>
-            </div>
-        </form>
-    </div>
-
 </div>
-
-<style>
-.fn-back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f3f4f6; border-radius: 8px; color: #374151; text-decoration: none; font-size: 14px; font-weight: 500; flex-shrink: 0; }
-.fn-back-btn:hover { background: #e5e7eb; }
-.fn-page-title { font-size: 22px; font-weight: 700; color: #111827; margin: 0 0 2px; }
-.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
-.fn-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.fn-detail-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
-.fn-detail-card-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid #f3f4f6; }
-.fn-detail-card-title { font-size: 15px; font-weight: 700; color: #111827; }
-.fn-info-list { padding: 8px 0; }
-.fn-info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 22px; border-bottom: 1px solid #f9fafb; gap: 16px; }
-.fn-info-row:last-child { border-bottom: none; }
-.fn-info-label { font-size: 13px; color: #6b7280; font-weight: 500; flex-shrink: 0; }
-.fn-info-value { font-size: 14px; color: #111827; font-weight: 600; text-align: right; }
-.fn-timeline { padding: 20px 22px; display: flex; flex-direction: column; gap: 0; }
-.fn-timeline-item { display: flex; gap: 14px; padding-bottom: 20px; position: relative; }
-.fn-timeline-item:last-child { padding-bottom: 0; }
-.fn-timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 7px; top: 16px; bottom: 0; width: 2px; background: #e5e7eb; }
-.fn-timeline-dot { width: 16px; height: 16px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 2px; border: 2px solid #fff; box-shadow: 0 0 0 2px #2563eb; }
-.fn-timeline-body { flex: 1; }
-.fn-timeline-status { font-size: 14px; font-weight: 700; color: #111827; margin: 0 0 4px; }
-.fn-timeline-meta { font-size: 12px; color: #9ca3af; margin: 0; }
-.fn-timeline-note { font-size: 13px; color: #6b7280; margin: 6px 0 0; font-style: italic; }
-@media (max-width: 768px) { .fn-detail-grid { grid-template-columns: 1fr; } }
-</style>
-
 {% endblock %}

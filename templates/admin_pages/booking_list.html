@@ -1,101 +1,74 @@
 {% extends "admin_pages/base.html" %}
 {% load static %}
 
-{% block title %}Bookings | Admin Dashboard{% endblock %}
+{% block title %}Bookings | FixNow Admin{% endblock %}
 {% block nav_bookings %}active{% endblock %}
 
 {% block content %}
-
 <div class="fn-page-header">
-    <div>
-        <h1 class="fn-page-title">Bookings</h1>
-        <p class="fn-page-sub">All service bookings across the platform</p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px;">
+        <div>
+            <h1 class="fn-display fn-display-sm">Bookings</h1>
+            <p class="fn-page-sub">View and manage all customer bookings.</p>
+        </div>
     </div>
 </div>
 
-<div class="fn-filter-bar">
+<div class="fn-filter-bar" style="margin-bottom: 24px;">
     <a href="{% url 'admin_booking_list' %}" class="fn-filter-btn {% if not status_filter %}fn-filter-active{% endif %}">All</a>
     <a href="?status=pending" class="fn-filter-btn {% if status_filter == 'pending' %}fn-filter-active{% endif %}">Pending</a>
     <a href="?status=confirmed" class="fn-filter-btn {% if status_filter == 'confirmed' %}fn-filter-active{% endif %}">Confirmed</a>
     <a href="?status=in_progress" class="fn-filter-btn {% if status_filter == 'in_progress' %}fn-filter-active{% endif %}">In Progress</a>
     <a href="?status=completed" class="fn-filter-btn {% if status_filter == 'completed' %}fn-filter-active{% endif %}">Completed</a>
-    <a href="?status=rejected" class="fn-filter-btn {% if status_filter == 'rejected' %}fn-filter-active{% endif %}">Rejected</a>
     <a href="?status=cancelled" class="fn-filter-btn {% if status_filter == 'cancelled' %}fn-filter-active{% endif %}">Cancelled</a>
+    <a href="?status=rejected" class="fn-filter-btn {% if status_filter == 'rejected' %}fn-filter-active{% endif %}">Rejected</a>
 </div>
 
-<div class="fn-table-card">
-    <div style="overflow-x: auto;">
-        <table class="fn-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Provider</th>
-                    <th>Category</th>
-                    <th>Scheduled</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                <tr>
-                    <td>#{{ booking.id }}</td>
-                    <td>{{ booking.customer.email }}</td>
-                    <td>{{ booking.provider.user.email }}</td>
-                    <td>{{ booking.category.name|default:"-" }}</td>
-                    <td>{{ booking.scheduled_date|date:"M d, Y" }}<br><small>{{ booking.scheduled_time }}</small></td>
-                    <td>
-                        {% if booking.status == 'pending' %}
-                            <span class="badge badge-warning">Pending</span>
-                        {% elif booking.status == 'confirmed' %}
-                            <span class="badge badge-primary">Confirmed</span>
-                        {% elif booking.status == 'in_progress' %}
-                            <span class="badge badge-secondary">In Progress</span>
-                        {% elif booking.status == 'completed' %}
-                            <span class="badge badge-success">Completed</span>
-                        {% elif booking.status == 'rejected' %}
-                            <span class="badge badge-danger">Rejected</span>
-                        {% elif booking.status == 'cancelled' %}
-                            <span class="badge badge-danger">Cancelled</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ booking.created_at|date:"M d, Y" }}</td>
-                    <td>
-                        <a href="{% url 'admin_booking_detail' booking.id %}" class="fn-btn fn-btn-view" title="View Detail">
-                            <i class="icofont-eye-alt"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" style="text-align:center; padding:32px; color:#9ca3af;">No bookings found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="fn-table-wrap">
+    <table class="fn-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Provider</th>
+                <th>Service</th>
+                <th>Scheduled</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td style="color: var(--fn-text-3);">#{{ booking.id }}</td>
+                <td>
+                    <strong style="color: var(--fn-text-1);">{{ booking.customer.get_full_name|default:booking.customer.email }}</strong>
+                </td>
+                <td>
+                    <strong style="color: var(--fn-text-1);">{{ booking.provider.user.get_full_name|default:booking.provider.user.email }}</strong>
+                </td>
+                <td>{{ booking.category.name|default:"-" }}</td>
+                <td>
+                    {{ booking.scheduled_date|date:"M d, Y" }}<br>
+                    <small style="color: var(--fn-text-3);">{{ booking.scheduled_time }}</small>
+                </td>
+                <td>
+                    <span class="fn-badge fn-badge-{{ booking.status }}">
+                        {{ booking.status|title }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'admin_booking_detail' booking.id %}" class="fn-btn fn-btn-ghost fn-btn-sm">View →</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="fn-empty" style="padding: 60px 20px;">
+                    <div class="fn-empty-sub">No bookings found matching this criteria.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-
-<style>
-.fn-page-header { margin-bottom: 24px; }
-.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
-.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
-.fn-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.fn-filter-btn { padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; color: #6b7280; background: #fff; border: 1px solid #e5e7eb; text-decoration: none; transition: all 0.2s; }
-.fn-filter-btn:hover { background: #f3f4f6; color: #111827; }
-.fn-filter-active { background: #2563eb; color: #fff; border-color: #2563eb; }
-.fn-filter-active:hover { background: #1d4ed8; color: #fff; }
-.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
-.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
-.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
-.fn-table tbody tr:last-child td { border-bottom: none; }
-.fn-table tbody tr:hover { background: #f9fafb; }
-.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; text-decoration: none; }
-.fn-btn-view { background: #eff6ff; color: #2563eb; }
-</style>
-
 {% endblock %}

@@ -1,126 +1,64 @@
 {% extends "admin_pages/base.html" %}
 {% load static %}
 
-{% block title %}Reviews | Admin Dashboard{% endblock %}
+{% block title %}Reviews | FixNow Admin{% endblock %}
 {% block nav_reviews %}active{% endblock %}
 
 {% block content %}
-
-<div class="fn-page-header" style="margin-bottom:24px;">
-    <h1 class="fn-page-title">Reviews</h1>
-    <p class="fn-page-sub">All customer reviews across the platform</p>
-</div>
-
-{% if messages %}
-<div class="fn-messages">
-    {% for message in messages %}
-    <div class="fn-alert fn-alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<div class="fn-table-card">
-    <div style="overflow-x:auto;">
-        <table class="fn-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Customer</th>
-                    <th>Provider</th>
-                    <th>Rating</th>
-                    <th>Comment</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for review in reviews %}
-                <tr>
-                    <td>#{{ review.id }}</td>
-                    <td>{{ review.customer.email }}</td>
-                    <td>{{ review.provider.user.email }}</td>
-                    <td>
-                        <span class="fn-stars">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                            {% endfor %}
-                        </span>
-                        <span style="font-size:12px; color:#6b7280;">{{ review.rating }}/5</span>
-                    </td>
-                    <td style="max-width:200px;">{{ review.comment|truncatechars:80 }}</td>
-                    <td>{{ review.created_at|date:"M d, Y" }}</td>
-                    <td>
-                        <button class="fn-btn fn-btn-delete"
-                            onclick="openDeleteModal({{ review.id }})"
-                            title="Delete">
-                            <i class="icofont-ui-delete"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" style="text-align:center; padding:32px; color:#9ca3af;">No reviews yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Delete Modal -->
-<div class="fn-modal-overlay" id="deleteModal" style="display:none;">
-    <div class="fn-modal fn-modal-sm">
-        <div class="fn-modal-header">
-            <span class="fn-modal-title">Delete Review</span>
-            <button class="fn-modal-close" onclick="document.getElementById('deleteModal').style.display='none'">&times;</button>
+<div class="fn-page-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px;">
+        <div>
+            <h1 class="fn-display fn-display-sm">Customer Reviews</h1>
+            <p class="fn-page-sub">Monitor feedback given by customers to providers.</p>
         </div>
-        <form method="POST" id="deleteForm" action="">
-            {% csrf_token %}
-            <div class="fn-modal-body">
-                <p style="color:#374151; font-size:15px;">Are you sure you want to delete this review? This cannot be undone.</p>
-            </div>
-            <div class="fn-modal-footer">
-                <button type="button" class="fn-btn-cancel" onclick="document.getElementById('deleteModal').style.display='none'">Cancel</button>
-                <button type="submit" class="fn-btn-delete-confirm">Delete</button>
-            </div>
-        </form>
     </div>
 </div>
 
-<style>
-.fn-page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
-.fn-page-sub { font-size: 14px; color: #6b7280; margin: 0; }
-.fn-messages { margin-bottom: 16px; }
-.fn-alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
-.fn-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.fn-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.fn-table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
-.fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.fn-table thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-.fn-table th { padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; }
-.fn-table td { padding: 14px 16px; color: #374151; border-bottom: 1px solid #f3f4f6; }
-.fn-table tbody tr:last-child td { border-bottom: none; }
-.fn-table tbody tr:hover { background: #f9fafb; }
-.fn-stars { color: #f59e0b; font-size: 15px; letter-spacing: 1px; }
-.fn-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
-.fn-btn-delete { background: #fef2f2; color: #dc2626; }
-.fn-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.fn-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.fn-modal-sm { max-width: 380px; }
-.fn-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
-.fn-modal-title { font-size: 16px; font-weight: 700; color: #111827; }
-.fn-modal-close { background: none; border: none; font-size: 22px; color: #9ca3af; cursor: pointer; }
-.fn-modal-body { padding: 20px 24px; }
-.fn-modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #f3f4f6; }
-.fn-btn-cancel { padding: 9px 18px; background: #f3f4f6; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; }
-.fn-btn-delete-confirm { padding: 9px 18px; background: #dc2626; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; }
-</style>
-
-<script>
-function openDeleteModal(reviewId) {
-    document.getElementById('deleteForm').action = '/dashboard/reviews/' + reviewId + '/delete/';
-    document.getElementById('deleteModal').style.display = 'flex';
-}
-</script>
-
+<div class="fn-table-wrap">
+    <table class="fn-table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Provider</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+            <tr>
+                <td style="color: var(--fn-text-3);">
+                    <a href="{% url 'admin_booking_detail' review.booking.id %}" style="color: var(--fn-text-2); text-decoration: underline;">#{{ review.booking.id }}</a>
+                </td>
+                <td>
+                    <strong style="color: var(--fn-text-1);">{{ review.customer.get_full_name|default:review.customer.email }}</strong>
+                </td>
+                <td>
+                    <strong style="color: var(--fn-text-1);">{{ review.provider.user.get_full_name|default:review.provider.user.email }}</strong>
+                </td>
+                <td style="color: var(--fn-accent);">★ {{ review.rating }}</td>
+                <td style="max-width:250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ review.comment }}">
+                    {{ review.comment|default:"No comment" }}
+                </td>
+                <td>{{ review.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <form method="POST" action="{% url 'admin_review_delete' review.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="fn-btn fn-btn-ghost fn-btn-sm" style="color: #ef4444; border-color: transparent;" onclick="return confirm('Delete this review permanently?');">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="fn-empty" style="padding: 60px 20px;">
+                    <div class="fn-empty-sub">No reviews have been submitted yet.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
