@@ -5,145 +5,137 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Booking #{{ booking.id }} | FixNow</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/fixnow.css' %}">
     <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root { --navy:#050d1f; --blue:#2563eb; --blue2:#3b82f6; --violet:#7c3aed; --violet2:#a855f7; --glass-bg:rgba(255,255,255,0.04); --glass-border:rgba(255,255,255,0.09); }
-        body { font-family:'Inter',sans-serif; background:var(--navy); color:#fff; min-height:100vh; }
-        .navbar { position:sticky; top:0; z-index:100; height:64px; display:flex; align-items:center; padding:0 44px; justify-content:space-between; background:rgba(5,13,31,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--glass-border); }
-        .logo { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; text-decoration:none; color:#fff; }
-        .logo span { background:linear-gradient(135deg,var(--blue2),var(--violet2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .content { max-width:780px; margin:0 auto; padding:36px 40px; }
-        .back-link { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,0.4); text-decoration:none; font-size:13.5px; margin-bottom:24px; transition:color 0.2s; }
-        .back-link:hover { color:rgba(255,255,255,0.7); }
-        .card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:16px; overflow:hidden; margin-bottom:16px; }
-        .card-header { padding:18px 24px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; }
-        .card-title { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; color:rgba(255,255,255,0.8); }
-        .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
-        .badge-pending { background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); }
-        .badge-confirmed { background:rgba(37,99,235,0.15); color:#93c5fd; border:1px solid rgba(37,99,235,0.3); }
-        .badge-in_progress { background:rgba(16,185,129,0.12); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); }
-        .badge-completed { background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3); }
-        .badge-rejected { background:rgba(239,68,68,0.12); color:#fca5a5; border:1px solid rgba(239,68,68,0.25); }
-        .badge-cancelled { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.1); }
-        .info-row { display:flex; justify-content:space-between; padding:13px 24px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:14px; gap:16px; }
-        .info-row:last-child { border-bottom:none; }
-        .info-label { color:rgba(255,255,255,0.4); font-weight:500; flex-shrink:0; }
-        .info-value { color:rgba(255,255,255,0.8); font-weight:600; text-align:right; }
-        /* Timeline */
-        .timeline { padding:20px 24px; }
-        .tl-item { display:flex; gap:14px; padding-bottom:22px; position:relative; }
-        .tl-item:last-child { padding-bottom:0; }
-        .tl-item:not(:last-child)::before { content:''; position:absolute; left:7px; top:16px; bottom:0; width:2px; background:rgba(37,99,235,0.25); }
-        .tl-dot { width:16px; height:16px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--violet)); flex-shrink:0; margin-top:3px; box-shadow:0 0 0 3px rgba(37,99,235,0.15); }
-        .tl-status { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-        .tl-time { font-size:12px; color:rgba(255,255,255,0.3); }
-        .tl-note { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; }
-        /* Review */
-        .review-form { padding:24px; }
-        .form-group { margin-bottom:16px; }
-        .form-label { display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:8px; }
-        .star-rating { display:flex; flex-direction:row-reverse; gap:6px; }
-        .star-rating input { display:none; }
-        .star-rating label { font-size:32px; color:rgba(255,255,255,0.15); cursor:pointer; transition:color 0.15s; }
+        .detail-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+        .detail-card { background: var(--fn-bg-card); border: 1px solid var(--fn-border); border-radius: var(--fn-radius-card); overflow: hidden; }
+        .detail-card-header { padding: 20px 24px; border-bottom: 1px solid var(--fn-border); display: flex; justify-content: space-between; align-items: center; }
+        .detail-card-title { font-family: var(--fn-font-head); font-size: 15px; font-weight: 700; color: var(--fn-text-1); }
+        .detail-card-body { padding: 8px 24px; }
+        .star-rating { display: flex; flex-direction: row-reverse; gap: 4px; margin-bottom: 4px; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 28px; color: var(--fn-border); cursor: pointer; transition: color 0.1s; }
         .star-rating input:checked ~ label,
         .star-rating label:hover,
-        .star-rating label:hover ~ label { color:#fbbf24; }
-        .form-textarea { width:100%; padding:11px 14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; font-size:14px; color:#fff; outline:none; resize:vertical; min-height:80px; font-family:'Inter',sans-serif; transition:all 0.2s; }
-        .form-textarea::placeholder { color:rgba(255,255,255,0.25); }
-        .form-textarea:focus { border-color:rgba(37,99,235,0.5); box-shadow:0 0 0 3px rgba(37,99,235,0.12); background:rgba(255,255,255,0.08); }
-        .btn-review { padding:11px 24px; background:linear-gradient(135deg,var(--blue),var(--violet)); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
-        .btn-review:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(37,99,235,0.4); }
-        .review-done { padding:16px 24px; background:rgba(16,185,129,0.1); color:#6ee7b7; font-size:14px; font-weight:500; display:flex; align-items:center; gap:8px; border-top:1px solid rgba(16,185,129,0.15); }
-        .cancel-form { padding:16px 24px; border-top:1px solid rgba(255,255,255,0.06); }
-        .cancel-btn { padding:9px 22px; background:rgba(239,68,68,0.1); color:#fca5a5; border:1px solid rgba(239,68,68,0.25); border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
-        .cancel-btn:hover { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); }
-        @media(max-width:600px) { .navbar { padding:0 20px; } .content { padding:24px 16px; } }
+        .star-rating label:hover ~ label { color: var(--fn-accent); }
+        @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-<nav class="navbar">
-    <a href="{% url 'home' %}" class="logo">Fix<span>Now</span></a>
-</nav>
-<div class="content">
-    <a href="{% url 'customer_dashboard' %}" class="back-link">← My Bookings</a>
 
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">Booking #{{ booking.id }}</span>
-            <span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span>
-        </div>
-        <div class="info-row"><span class="info-label">Service</span><span class="info-value">{{ booking.category.name }}</span></div>
-        <div class="info-row"><span class="info-label">Provider</span><span class="info-value">{{ booking.provider.user.get_full_name }}</span></div>
-        <div class="info-row"><span class="info-label">Date</span><span class="info-value">{{ booking.scheduled_date|date:"F d, Y" }}</span></div>
-        <div class="info-row"><span class="info-label">Time</span><span class="info-value">{{ booking.scheduled_time }}</span></div>
-        <div class="info-row"><span class="info-label">Address</span><span class="info-value">{{ booking.address }}</span></div>
-        <div class="info-row"><span class="info-label">Pincode</span><span class="info-value">{{ booking.pincode }}</span></div>
-        <div class="info-row"><span class="info-label">Description</span><span class="info-value">{{ booking.description }}</span></div>
-        <div class="info-row"><span class="info-label">Booked On</span><span class="info-value">{{ booking.created_at|date:"M d, Y h:i A" }}</span></div>
+<nav class="fn-navbar">
+    <a href="{% url 'home' %}" class="fn-navbar__logo">FixNow</a>
+</nav>
+
+<div class="fn-container" style="padding-top:40px; padding-bottom:80px;">
+
+    <a href="{% url 'customer_dashboard' %}" class="fn-back">← My Bookings</a>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px;">
+        <h1 class="fn-display fn-display-sm">Booking #{{ booking.id }}</h1>
+        {% if booking.status == 'pending' %}<span class="fn-badge fn-badge-pending">Pending</span>
+        {% elif booking.status == 'confirmed' %}<span class="fn-badge fn-badge-confirmed">Confirmed</span>
+        {% elif booking.status == 'in_progress' %}<span class="fn-badge fn-badge-progress">In Progress</span>
+        {% elif booking.status == 'completed' %}<span class="fn-badge fn-badge-completed">Completed</span>
+        {% elif booking.status == 'rejected' %}<span class="fn-badge fn-badge-rejected">Rejected</span>
+        {% elif booking.status == 'cancelled' %}<span class="fn-badge fn-badge-cancelled">Cancelled</span>
+        {% endif %}
     </div>
 
-    <div class="card">
-        <div class="card-header"><span class="card-title">📍 Status Timeline</span></div>
-        <div class="timeline">
-            {% for log in status_logs %}
-            <div class="tl-item">
-                <div class="tl-dot"></div>
-                <div>
-                    <div class="tl-status">{{ log.status|title }}</div>
-                    <div class="tl-time">{{ log.timestamp|date:"M d, Y h:i A" }}</div>
-                    {% if log.note %}<div class="tl-note">{{ log.note }}</div>{% endif %}
+    <div class="detail-grid">
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <span class="detail-card-title">Booking Information</span>
+                </div>
+                <div class="detail-card-body">
+                    <div class="fn-info-row"><span class="fn-info-label">Service</span><span class="fn-info-value">{{ booking.category.name }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Provider</span><span class="fn-info-value">{{ booking.provider.user.get_full_name }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Date</span><span class="fn-info-value">{{ booking.scheduled_date|date:"F d, Y" }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Time</span><span class="fn-info-value">{{ booking.scheduled_time }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Address</span><span class="fn-info-value" style="max-width:200px; text-align:right;">{{ booking.address }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Pincode</span><span class="fn-info-value">{{ booking.pincode }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Description</span><span class="fn-info-value" style="max-width:200px; text-align:right;">{{ booking.description }}</span></div>
+                    <div class="fn-info-row"><span class="fn-info-label">Booked On</span><span class="fn-info-value">{{ booking.created_at|date:"M d, Y h:i A" }}</span></div>
                 </div>
             </div>
-            {% empty %}
-            <p style="font-size:14px; color:rgba(255,255,255,0.3);">No status updates yet.</p>
-            {% endfor %}
-        </div>
-    </div>
 
-    {% if booking.status == 'completed' %}
-        {% if has_review %}
-        <div class="card">
-            <div class="review-done">✅ You have already reviewed this booking. Thank you!</div>
+            {% if booking.status == 'completed' %}
+                {% if has_review %}
+                <div class="detail-card">
+                    <div class="detail-card-header"><span class="detail-card-title">Review Submitted</span></div>
+                    <div style="padding:20px 24px; font-size:14px; color:var(--fn-text-2);">You have already reviewed this booking. Thank you!</div>
+                </div>
+                {% else %}
+                <div class="detail-card">
+                    <div class="detail-card-header"><span class="detail-card-title">Leave a Review</span></div>
+                    <div style="padding:20px 24px;">
+                        <form method="POST" action="{% url 'submit_review' booking.id %}">
+                            {% csrf_token %}
+                            <div class="fn-field">
+                                <label class="fn-label">Rating</label>
+                                <div class="star-rating">
+                                    <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
+                                    <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
+                                    <input type="radio" name="rating" id="s3" value="3" checked><label for="s3">★</label>
+                                    <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
+                                    <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+                                </div>
+                            </div>
+                            <div class="fn-field">
+                                <label class="fn-label">Comment</label>
+                                <textarea name="comment" class="fn-input" rows="3" placeholder="Tell others about your experience..."></textarea>
+                            </div>
+                            <button type="submit" class="fn-btn fn-btn-primary fn-btn-full">Submit Review</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+            <div class="detail-card">
+                <div style="padding:20px 24px;">
+                    <form method="POST" action="{% url 'cancel_booking' booking.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="fn-btn fn-btn-danger fn-btn-full" onclick="return confirm('Cancel this booking?');">Cancel Booking</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
-        {% else %}
-        <div class="card">
-            <div class="card-header"><span class="card-title">⭐ Leave a Review</span></div>
-            <div class="review-form">
-                <form method="POST" action="{% url 'submit_review' booking.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label class="form-label">Rating *</label>
-                        <div class="star-rating">
-                            <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
-                            <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
-                            <input type="radio" name="rating" id="s3" value="3" checked><label for="s3">★</label>
-                            <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
-                            <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+
+        <div class="detail-card">
+            <div class="detail-card-header"><span class="detail-card-title">Status Timeline</span></div>
+            <div style="padding:20px 24px;">
+                <div class="fn-timeline">
+                    {% for log in status_logs %}
+                    <div class="fn-timeline-item">
+                        <div class="fn-timeline-dot"></div>
+                        <div>
+                            <div class="fn-timeline-status">{{ log.status|title }}</div>
+                            <div class="fn-timeline-meta">{{ log.timestamp|date:"M d, Y h:i A" }}</div>
+                            {% if log.note %}<div class="fn-timeline-note">{{ log.note }}</div>{% endif %}
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Comment</label>
-                        <textarea name="comment" class="form-textarea" rows="3" placeholder="Tell others about your experience..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-review">Submit Review →</button>
-                </form>
+                    {% empty %}
+                    <p style="font-size:14px; color:var(--fn-text-3);">No updates yet.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-        {% endif %}
-    {% endif %}
 
-    {% if booking.status == 'pending' or booking.status == 'confirmed' %}
-    <div class="card">
-        <div class="cancel-form">
-            <form method="POST" action="{% url 'cancel_booking' booking.id %}">
-                {% csrf_token %}
-                <button type="submit" class="cancel-btn" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel Booking</button>
-            </form>
-        </div>
     </div>
-    {% endif %}
+
 </div>
+
+<footer class="fn-footer">
+    <span class="fn-footer__logo">FixNow</span>
+    <span class="fn-footer__copy">© 2026 FixNow · Built by <a href="https://abhijithp.vercel.app/" target="_blank" rel="noopener">Abhijith P</a></span>
+</footer>
+
 </body>
 </html>

@@ -4,218 +4,171 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Join as Provider | FixNow</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Provider Registration | FixNow</title>
+    <link rel="stylesheet" href="{% static 'css/fixnow.css' %}">
     <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root { --navy:#050d1f; --blue:#2563eb; --blue2:#3b82f6; --violet:#7c3aed; --violet2:#a855f7; --glass-bg:rgba(255,255,255,0.045); --glass-border:rgba(255,255,255,0.10); --input-bg:rgba(255,255,255,0.06); --input-border:rgba(255,255,255,0.14); }
-        body { font-family:'Inter',sans-serif; background:var(--navy); color:#fff; min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; position:relative; overflow-x:hidden; }
-        .bg-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; }
-        .orb-1 { width:500px; height:500px; background:radial-gradient(circle,rgba(37,99,235,0.25) 0%,transparent 70%); top:-15%; left:-10%; }
-        .orb-2 { width:400px; height:400px; background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 70%); bottom:5%; right:-10%; }
-        body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
-        .auth-card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:24px; padding:40px 36px; width:100%; max-width:580px; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:0 24px 64px rgba(0,0,0,0.5); position:relative; z-index:1; animation:fadeUp 0.5s ease both; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-        .auth-logo { text-align:center; margin-bottom:24px; }
-        .logo-link { font-family:'Outfit',sans-serif; font-size:26px; font-weight:800; text-decoration:none; color:#fff; }
-        .logo-link span { background:linear-gradient(135deg,var(--blue2),var(--violet2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .auth-subtitle { font-size:14px; color:rgba(255,255,255,0.45); margin-top:6px; }
-        .approval-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.12); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); border-radius:20px; padding:4px 14px; font-size:12px; font-weight:600; margin-top:8px; }
-        .info-box { background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2); border-radius:12px; padding:12px 16px; margin-bottom:24px; font-size:13px; color:rgba(255,255,255,0.55); line-height:1.6; }
-        .alert { padding:11px 14px; border-radius:10px; margin-bottom:14px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
-        .alert-error { background:rgba(220,38,38,0.15); color:#fca5a5; border:1px solid rgba(220,38,38,0.3); }
-        .alert-success { background:rgba(16,185,129,0.12); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); }
-        .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--blue2); margin:28px 0 16px; padding-bottom:10px; border-bottom:1px solid rgba(37,99,235,0.2); display:flex; align-items:center; gap:8px; }
-        .form-group { margin-bottom:16px; }
-        .form-label { display:block; font-size:13px; font-weight:600; color:rgba(255,255,255,0.7); margin-bottom:7px; }
-        .form-hint { font-size:11.5px; color:rgba(255,255,255,0.3); margin-top:5px; }
-        .form-input { width:100%; padding:11px 14px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:10px; font-size:14px; color:#fff; outline:none; transition:all 0.2s; font-family:'Inter',sans-serif; }
-        .form-input::placeholder { color:rgba(255,255,255,0.25); }
-        .form-input:focus { border-color:rgba(37,99,235,0.6); background:rgba(255,255,255,0.08); box-shadow:0 0 0 3px rgba(37,99,235,0.15); }
-        textarea.form-input { resize:vertical; min-height:80px; }
-        select.form-input option { background:#0f172a; color:#fff; }
-        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-        .pwd-wrapper { position:relative; display:flex; align-items:center; }
-        .pwd-toggle { position:absolute; right:13px; background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.35); display:flex; align-items:center; padding:0; transition:color 0.2s; }
-        .pwd-toggle:hover { color:rgba(255,255,255,0.7); }
-        .pwd-toggle svg { width:18px; height:18px; }
-        .pincode-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; max-height:200px; overflow-y:auto; border:1px solid var(--input-border); border-radius:10px; padding:10px; background:rgba(0,0,0,0.2); }
-        .pincode-grid::-webkit-scrollbar { width:4px; }
-        .pincode-grid::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
-        .pincode-item { display:flex; align-items:flex-start; gap:8px; padding:9px 11px; border:1px solid rgba(255,255,255,0.08); border-radius:8px; cursor:pointer; font-size:13px; transition:all 0.2s; }
-        .pincode-item:hover { background:rgba(37,99,235,0.1); border-color:rgba(37,99,235,0.3); }
-        .pincode-item input[type="checkbox"] { accent-color:var(--blue2); margin-top:2px; flex-shrink:0; }
-        .pincode-item input:checked ~ span { color:#fff; }
-        .pincode-name { font-size:11px; color:rgba(255,255,255,0.4); display:block; margin-top:2px; }
-        .custom-cat-box { display:none; margin-top:10px; }
-        .btn-submit { width:100%; padding:14px; margin-top:24px; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; background:linear-gradient(135deg,var(--blue),var(--violet)); color:#fff; font-family:'Inter',sans-serif; transition:all 0.25s; box-shadow:0 4px 20px rgba(37,99,235,0.35); }
-        .btn-submit:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(37,99,235,0.5); filter:brightness(1.08); }
-        .auth-links { text-align:center; font-size:13.5px; color:rgba(255,255,255,0.35); margin-top:20px; line-height:2; }
-        .auth-links a { color:var(--blue2); font-weight:600; text-decoration:none; }
-        .auth-links a:hover { color:var(--violet2); }
-        .back-home { display:flex; justify-content:center; margin-top:16px; }
-        .back-home a { font-size:13px; color:rgba(255,255,255,0.25); text-decoration:none; transition:color 0.2s; }
-        .back-home a:hover { color:rgba(255,255,255,0.5); }
-        @media(max-width:540px) { .two-col { grid-template-columns:1fr; } .auth-card { padding:32px 22px; } }
+        body { min-height: 100vh; padding: 40px 20px; }
+        .auth-wrap { width: 100%; max-width: 580px; margin: 0 auto; }
+        .auth-logo { font-family: var(--fn-font-head); font-size: 24px; font-weight: 800; letter-spacing: -0.04em; color: var(--fn-text-1); margin-bottom: 40px; display: block; text-align: center; }
+        .auth-card { background: var(--fn-bg-card); border: 1px solid var(--fn-border); border-radius: var(--fn-radius-card); padding: 36px; }
+        .auth-title { font-family: var(--fn-font-head); font-size: 22px; font-weight: 800; color: var(--fn-text-1); letter-spacing: -0.02em; margin-bottom: 6px; }
+        .auth-sub { font-size: 14px; color: var(--fn-text-3); margin-bottom: 8px; }
+        .approval-note { display: inline-flex; align-items: center; gap: 6px; background: #fefce8; color: #a16207; border: 1px solid #fde68a; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin-bottom: 28px; }
+        .section-divider { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--fn-text-3); margin: 24px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--fn-border); }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .custom-cat-box { display: none; margin-top: 10px; }
+        .pincode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; border: 1.5px solid var(--fn-border); border-radius: 10px; padding: 12px; }
+        .pincode-item { display: flex; align-items: flex-start; gap: 8px; padding: 10px; border: 1px solid var(--fn-border); border-radius: 8px; cursor: pointer; transition: border-color 0.2s; }
+        .pincode-item:hover { border-color: var(--fn-text-1); }
+        .pincode-item input { margin-top: 2px; flex-shrink: 0; accent-color: var(--fn-text-1); }
+        .pincode-item span { font-size: 13px; color: var(--fn-text-2); line-height: 1.4; }
+        .pincode-item strong { display: block; font-size: 13px; color: var(--fn-text-1); }
+        .pincode-hint { font-size: 12px; color: var(--fn-text-3); margin-top: 10px; }
+        .pincode-hint a { color: var(--fn-text-1); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+        .file-hint { font-size: 12px; color: var(--fn-text-3); margin-top: 4px; }
+        .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--fn-text-3); }
+        .auth-footer a { color: var(--fn-text-1); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+        @media (max-width: 520px) { .two-col { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-<div class="bg-orb orb-1"></div>
-<div class="bg-orb orb-2"></div>
+    <div class="auth-wrap">
+        <a href="{% url 'home' %}" class="auth-logo">FixNow</a>
+        <div class="auth-card">
+            <div class="auth-title">Join as a Provider</div>
+            <div class="auth-sub">Offer your services on FixNow.</div>
+            <span class="approval-note">Requires admin approval</span>
 
-<div class="auth-card">
-    <div class="auth-logo">
-        <a href="{% url 'home' %}" class="logo-link">Fix<span>Now</span></a>
-        <p class="auth-subtitle">Join as a Service Provider</p>
-        <div><span class="approval-badge">⏳ Requires Admin Approval</span></div>
-    </div>
-
-    <div class="info-box">
-        ℹ️ After submitting your application, our admin team will review your profile and documents. You'll be notified by email once approved.
-    </div>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
-                {% if message.tags == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <!-- Personal Info -->
-        <div class="section-title">👤 Personal Information</div>
-        <div class="two-col">
-            <div class="form-group">
-                <label class="form-label">First Name *</label>
-                <input type="text" name="first_name" class="form-input" placeholder="Rajan" required/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Last Name *</label>
-                <input type="text" name="last_name" class="form-input" placeholder="Kumar" required/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Email Address *</label>
-            <input type="email" name="email" class="form-input" placeholder="you@example.com" required/>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Phone Number *</label>
-            <input type="tel" name="phone" class="form-input" placeholder="+91 9876543210" required/>
-        </div>
-        <div class="two-col">
-            <div class="form-group">
-                <label class="form-label">Password *</label>
-                <div class="pwd-wrapper">
-                    <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required style="padding-right:44px;"/>
-                    <button type="button" class="pwd-toggle" onclick="togglePwd('password',this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Confirm Password *</label>
-                <div class="pwd-wrapper">
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="••••••••" required style="padding-right:44px;"/>
-                    <button type="button" class="pwd-toggle" onclick="togglePwd('confirm_password',this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Service Info -->
-        <div class="section-title">🛠 Service Information</div>
-        <div class="form-group">
-            <label class="form-label">Service Category *</label>
-            <select name="category_id" id="category_select" class="form-input" required onchange="toggleCustomCat(this)">
-                <option value="">-- Select your service --</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
+            {% if messages %}
+                {% for message in messages %}
+                <div class="fn-alert fn-alert-error">{{ message }}</div>
                 {% endfor %}
-                <option value="other">Other (not listed)</option>
-            </select>
-        </div>
-        <div class="custom-cat-box" id="custom_cat_box">
-            <div class="form-group">
-                <label class="form-label">Describe your service *</label>
-                <input type="text" name="custom_category" id="custom_category" class="form-input" placeholder="e.g. Swimming Pool Cleaning"/>
-            </div>
-        </div>
-        <div class="two-col">
-            <div class="form-group">
-                <label class="form-label">Years of Experience *</label>
-                <input type="number" name="experience_years" class="form-input" placeholder="e.g. 5" min="0" max="50" required/>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Profile Photo</label>
-                <input type="file" name="profile_photo" class="form-input" accept="image/*"/>
-                <p class="form-hint">JPG or PNG, max 2MB</p>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Bio — Tell customers about yourself</label>
-            <textarea name="bio" class="form-input" rows="3" placeholder="e.g. Certified plumber with 10+ years of experience in residential and commercial plumbing..."></textarea>
-        </div>
-        <div class="form-group">
-            <label class="form-label">ID Proof *</label>
-            <input type="file" name="id_proof" class="form-input" accept=".pdf,.jpg,.jpeg,.png" required/>
-            <p class="form-hint">Aadhaar, Driving License, or any Government ID. PDF or image.</p>
-        </div>
-
-        <!-- Service Areas -->
-        <div class="section-title">📍 Service Areas (Pincodes)</div>
-        <div class="form-group">
-            <label class="form-label">Select the areas you serve *</label>
-            {% if pincodes %}
-            <div class="pincode-grid">
-                {% for pin in pincodes %}
-                <label class="pincode-item">
-                    <input type="checkbox" name="pincodes" value="{{ pin.id }}">
-                    <span>
-                        <strong>{{ pin.pincode }}</strong>
-                        <span class="pincode-name">{{ pin.area_name }}, {{ pin.district }}</span>
-                    </span>
-                </label>
-                {% endfor %}
-            </div>
-            <p class="form-hint" style="margin-top:10px;">
-                Don't see your area? Contact <a href="mailto:fixnow@gmail.com" style="color:#3b82f6;">fixnow@gmail.com</a>
-            </p>
-            {% else %}
-            <p style="font-size:13px; color:rgba(255,255,255,0.3); padding:10px 0;">No service areas listed yet. You can update this after approval.</p>
             {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="section-divider">Personal Information</div>
+
+                <div class="two-col">
+                    <div class="fn-field">
+                        <label class="fn-label">First Name</label>
+                        <input type="text" name="first_name" class="fn-input" placeholder="Rajan" required/>
+                    </div>
+                    <div class="fn-field">
+                        <label class="fn-label">Last Name</label>
+                        <input type="text" name="last_name" class="fn-input" placeholder="K" required/>
+                    </div>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">Email Address</label>
+                    <input type="email" name="email" class="fn-input" placeholder="you@example.com" required/>
+                </div>
+                <div class="fn-field">
+                    <label class="fn-label">Phone Number</label>
+                    <input type="tel" name="phone" class="fn-input" placeholder="+91 9876543210" required/>
+                </div>
+                <div class="two-col">
+                    <div class="fn-field">
+                        <label class="fn-label">Password</label>
+                        <input type="password" id="password" name="password" class="fn-input" placeholder="••••••••" required/>
+                    </div>
+                    <div class="fn-field">
+                        <label class="fn-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="fn-input" placeholder="••••••••" required/>
+                    </div>
+                </div>
+
+                <div class="section-divider">Service Information</div>
+
+                <div class="fn-field">
+                    <label class="fn-label">Service Category</label>
+                    <select name="category_id" id="category_select" class="fn-input" required onchange="toggleCustomCat(this)">
+                        <option value="">Select your service</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                        <option value="other">Other (not listed)</option>
+                    </select>
+                </div>
+
+                <div class="custom-cat-box" id="custom_cat_box">
+                    <div class="fn-field">
+                        <label class="fn-label">Describe your service</label>
+                        <input type="text" name="custom_category" id="custom_category" class="fn-input" placeholder="e.g. Swimming Pool Cleaning"/>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="fn-field">
+                        <label class="fn-label">Years of Experience</label>
+                        <input type="number" name="experience_years" class="fn-input" placeholder="5" min="0" max="50" required/>
+                    </div>
+                    <div class="fn-field">
+                        <label class="fn-label">Profile Photo</label>
+                        <input type="file" name="profile_photo" class="fn-input" accept="image/*"/>
+                        <p class="file-hint">JPG or PNG, max 2MB</p>
+                    </div>
+                </div>
+
+                <div class="fn-field">
+                    <label class="fn-label">Bio</label>
+                    <textarea name="bio" class="fn-input" rows="3" placeholder="Tell customers about your experience..."></textarea>
+                </div>
+
+                <div class="fn-field">
+                    <label class="fn-label">ID Proof</label>
+                    <input type="file" name="id_proof" class="fn-input" accept=".pdf,.jpg,.jpeg,.png" required/>
+                    <p class="file-hint">Aadhaar, Driving License or any Government ID</p>
+                </div>
+
+                <div class="section-divider">Service Areas</div>
+
+                <div class="fn-field">
+                    <label class="fn-label">Select pincodes you serve</label>
+                    {% if pincodes %}
+                    <div class="pincode-grid">
+                        {% for pin in pincodes %}
+                        <label class="pincode-item">
+                            <input type="checkbox" name="pincodes" value="{{ pin.id }}">
+                            <span>
+                                <strong>{{ pin.pincode }}</strong>
+                                {{ pin.area_name }}, {{ pin.district }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <p class="pincode-hint">
+                        Don't see your area? Contact us at
+                        <a href="mailto:fixnow@gmail.com">fixnow@gmail.com</a>
+                    </p>
+                    {% else %}
+                    <p style="font-size:13px; color:var(--fn-text-3);">No pincodes listed yet. You can update this after approval.</p>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="fn-btn fn-btn-primary fn-btn-full" style="margin-top:16px;">Submit Application</button>
+            </form>
         </div>
-
-        <button type="submit" class="btn-submit">Submit Application →</button>
-    </form>
-
-    <div class="auth-links">
-        Already have an account? <a href="{% url 'user_login' %}">Sign In</a>
-        &nbsp;·&nbsp;
-        Need services? <a href="{% url 'customer_register' %}">Register as Customer</a>
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'user_login' %}">Sign in</a>
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            Need services? <a href="{% url 'customer_register' %}">Register as Customer</a>
+        </div>
     </div>
-</div>
-<div class="back-home"><a href="{% url 'home' %}">← Back to Home</a></div>
 
-<script>
-function toggleCustomCat(select) {
-    const box = document.getElementById('custom_cat_box');
-    const input = document.getElementById('custom_category');
-    box.style.display = select.value === 'other' ? 'block' : 'none';
-    input.required = select.value === 'other';
-}
-function togglePwd(id, btn) {
-    const input = document.getElementById(id);
-    const isText = input.type === 'text';
-    input.type = isText ? 'password' : 'text';
-    btn.innerHTML = isText
-        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>`
-        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>`;
-}
-</script>
+    <script>
+    function toggleCustomCat(select) {
+        const box = document.getElementById('custom_cat_box');
+        const input = document.getElementById('custom_category');
+        if (select.value === 'other') {
+            box.style.display = 'block';
+            input.required = true;
+        } else {
+            box.style.display = 'none';
+            input.required = false;
+        }
+    }
+    </script>
 </body>
 </html>

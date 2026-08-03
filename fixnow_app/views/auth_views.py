@@ -285,7 +285,7 @@ def user_login(request):
                         profile = user.provider_profile
                     except ProviderProfile.DoesNotExist:
                         messages.error(request, 'Provider profile not found.')
-                        return render(request, 'accounts/login.html', {'form': form})
+                        return render(request, 'authenticate/login.html', {})
 
                     if profile.status == 'pending':
                         login(request, user)
@@ -297,7 +297,7 @@ def user_login(request):
                         messages.error(request, 'Your provider application has been rejected. Please contact support.')
                     elif profile.status == 'suspended':
                         messages.error(request, 'Your account has been suspended. Please contact support.')
-                    return render(request, 'accounts/login.html', {'form': form})
+                    return render(request, 'authenticate/login.html', {})
 
                 elif user.user_type == 'customer':
                     login(request, user)
@@ -307,12 +307,8 @@ def user_login(request):
                     messages.error(request, 'Invalid account type.')
             else:
                 messages.error(request, 'Invalid email or password.')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, error)
 
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'authenticate/login.html', {})
 
 
 # ─────────────────────────────────────────
@@ -332,41 +328,45 @@ def customer_register(request):
     if request.user.is_authenticated:
         return redirect('home')
 
-    form = CustomerRegistrationForm(request.POST or None)
     if request.method == 'POST':
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            if User.objects.filter(email=email).exists():
-                messages.error(request, "An account with this email already exists.")
-                return render(request, 'accounts/customer_register.html', {'form': form})
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        password = request.POST.get('password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
 
-            name_parts = form.cleaned_data['name'].split(' ', 1)
-            first_name = name_parts[0]
-            last_name = name_parts[1] if len(name_parts) > 1 else ''
+        if not first_name or not email or not phone or not password:
+            messages.error(request, 'First name, email, phone and password are required.')
+            return render(request, 'accounts/customer_register.html', {})
 
-            # Store data in session
-            request.session['registration_data'] = {
-                'email': email,
-                'password': form.cleaned_data['password'],
-                'first_name': first_name,
-                'last_name': last_name,
-                'phone': form.cleaned_data['phone'],
-                'user_type': 'customer',
-            }
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'accounts/customer_register.html', {})
 
-            otp = _generate_otp()
-            request.session['otp'] = otp
-            request.session['otp_created_at'] = timezone.now().isoformat()
-            request.session['otp_attempts'] = 0
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'An account with this email already exists.')
+            return render(request, 'accounts/customer_register.html', {})
 
-            _send_otp_email(email, otp)
-            return redirect('verify_otp')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, error)
+        # Store data in session for OTP verification
+        request.session['registration_data'] = {
+            'email': email,
+            'password': password,
+            'first_name': first_name,
+            'last_name': last_name,
+            'phone': phone,
+            'user_type': 'customer',
+        }
 
-    return render(request, 'accounts/customer_register.html', {'form': form})
+        otp = _generate_otp()
+        request.session['otp'] = otp
+        request.session['otp_created_at'] = timezone.now().isoformat()
+        request.session['otp_attempts'] = 0
+
+        _send_otp_email(email, otp)
+        return redirect('verify_otp')
+
+    return render(request, 'accounts/customer_register.html', {})
 
 
 # ─────────────────────────────────────────

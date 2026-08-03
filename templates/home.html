@@ -5,1011 +5,403 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FixNow | Home Services at Your Doorstep</title>
-    <meta name="description" content="Book trusted local professionals for plumbing, electrical, AC repair, cleaning and more in Kerala — in just a few clicks."/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/fixnow.css' %}">
     <style>
-        /* ─── Reset & Base ─── */
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root {
-            --navy:    #050d1f;
-            --navy2:   #0a1628;
-            --blue:    #2563eb;
-            --blue2:   #3b82f6;
-            --violet:  #7c3aed;
-            --violet2: #a855f7;
-            --cyan:    #06b6d4;
-            --white:   #ffffff;
-            --gray-50: #f8fafc;
-            --gray-100:#f1f5f9;
-            --gray-200:#e2e8f0;
-            --gray-400:#94a3b8;
-            --gray-500:#64748b;
-            --gray-700:#334155;
-            --gray-900:#0f172a;
-            --glow-blue: 0 0 40px rgba(37,99,235,0.4);
-            --glow-violet: 0 0 40px rgba(124,58,237,0.4);
-            --glass-bg: rgba(255,255,255,0.04);
-            --glass-border: rgba(255,255,255,0.10);
-        }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--navy);
-            color: var(--white);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        /* ─── Scrollbar ─── */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--navy2); }
-        ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
-
-        /* ─── Navbar ─── */
-        .navbar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
-            height: 68px;
-            display: flex;
-            align-items: center;
-            padding: 0 48px;
-            justify-content: space-between;
-            background: rgba(5,13,31,0.70);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            transition: all 0.3s;
-        }
-        .navbar.scrolled {
-            background: rgba(5,13,31,0.95);
-            box-shadow: 0 4px 32px rgba(0,0,0,0.4);
-        }
-        .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 24px;
-            font-weight: 800;
-            text-decoration: none;
-            color: var(--white);
-            letter-spacing: -0.5px;
-        }
-        .logo span {
-            background: linear-gradient(135deg, var(--blue2), var(--violet2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .nav-links { display: flex; gap: 10px; align-items: center; }
-        .nav-user {
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.7);
-            padding: 6px 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-        }
-        .btn {
-            padding: 9px 22px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.25s;
-            display: inline-block;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-        .btn-ghost {
-            color: rgba(255,255,255,0.8);
-            background: transparent;
-            border: 1.5px solid rgba(255,255,255,0.18);
-        }
-        .btn-ghost:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.35);
-            color: var(--white);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            color: var(--white);
-            border: none;
-            box-shadow: 0 4px 20px rgba(37,99,235,0.35);
-        }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 28px rgba(37,99,235,0.5);
-            filter: brightness(1.1);
-        }
-        .btn-nav-dashboard {
-            background: rgba(37,99,235,0.15);
-            color: var(--blue2);
-            border: 1.5px solid rgba(37,99,235,0.35);
-        }
-        .btn-nav-dashboard:hover {
-            background: rgba(37,99,235,0.25);
-            border-color: var(--blue2);
-            color: var(--white);
-        }
-
-        /* ─── Hero ─── */
+        /* ── Hero ───────────────────────────────────────────── */
         .hero {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             text-align: center;
             padding: 120px 40px 80px;
             position: relative;
-            overflow: hidden;
         }
 
-        /* Animated gradient background */
-        .hero-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(37,99,235,0.20) 0%, transparent 65%),
-                        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(124,58,237,0.15) 0%, transparent 60%),
-                        radial-gradient(ellipse 60% 50% at 20% 70%, rgba(6,182,212,0.10) 0%, transparent 60%),
-                        var(--navy);
-        }
-
-        /* Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.35;
-            animation: floatOrb 12s ease-in-out infinite;
-        }
-        .orb-1 {
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, var(--blue) 0%, transparent 70%);
-            top: -10%; left: -5%;
-            animation-duration: 14s;
-        }
-        .orb-2 {
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
-            top: 20%; right: -5%;
-            animation-duration: 18s;
-            animation-delay: -5s;
-        }
-        .orb-3 {
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, var(--cyan) 0%, transparent 70%);
-            bottom: 5%; left: 20%;
-            animation-duration: 16s;
-            animation-delay: -9s;
-        }
-        @keyframes floatOrb {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33%  { transform: translate(30px, -40px) scale(1.05); }
-            66%  { transform: translate(-20px, 30px) scale(0.95); }
-        }
-
-        /* Particles canvas */
-        #particles { position: absolute; inset: 0; pointer-events: none; }
-
-        /* Grid lines overlay */
-        .hero-grid {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-        }
-
-        .hero-content { position: relative; z-index: 2; max-width: 820px; }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(37,99,235,0.12);
-            border: 1px solid rgba(37,99,235,0.35);
-            border-radius: 30px;
-            padding: 6px 18px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--blue2);
+        .hero__headline {
+            font-family: var(--fn-font-head);
+            font-size: clamp(52px, 9vw, 110px);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -0.04em;
+            color: var(--fn-text-1);
             margin-bottom: 28px;
-            animation: fadeSlideDown 0.7s ease both;
-        }
-        .hero-badge-dot {
-            width: 7px; height: 7px;
-            background: var(--blue2);
-            border-radius: 50%;
-            animation: pulse 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.7); }
+            max-width: 900px;
         }
 
-        .hero-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: clamp(40px, 7vw, 76px);
-            font-weight: 900;
-            line-height: 1.05;
-            letter-spacing: -2px;
-            margin-bottom: 24px;
-            animation: fadeSlideDown 0.7s ease 0.1s both;
-        }
-        .hero-title .gradient-text {
-            background: linear-gradient(135deg, var(--blue2) 0%, var(--violet2) 60%, var(--cyan) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: rgba(255,255,255,0.6);
-            max-width: 560px;
-            margin: 0 auto 40px;
+        .hero__sub {
+            font-size: clamp(16px, 2vw, 20px);
+            color: var(--fn-text-2);
+            max-width: 520px;
             line-height: 1.7;
-            animation: fadeSlideDown 0.7s ease 0.2s both;
+            margin-bottom: 48px;
+            font-family: var(--fn-font-body);
+            font-weight: 400;
         }
 
-        .hero-actions {
+        .hero__btns {
             display: flex;
             gap: 14px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 64px;
-            animation: fadeSlideDown 0.7s ease 0.3s both;
-        }
-        .btn-hero-primary {
-            padding: 16px 36px;
-            font-size: 16px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            color: var(--white);
-            border-radius: 12px;
-            text-decoration: none;
-            border: none;
-            box-shadow: 0 8px 32px rgba(37,99,235,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
-            transition: all 0.25s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 48px rgba(37,99,235,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
-            filter: brightness(1.08);
-        }
-        .btn-hero-secondary {
-            padding: 16px 36px;
-            font-size: 16px;
-            font-weight: 700;
-            background: rgba(255,255,255,0.06);
-            color: var(--white);
-            border-radius: 12px;
-            text-decoration: none;
-            border: 1.5px solid rgba(255,255,255,0.15);
-            transition: all 0.25s;
-            backdrop-filter: blur(8px);
-        }
-        .btn-hero-secondary:hover {
-            background: rgba(255,255,255,0.10);
-            border-color: rgba(255,255,255,0.30);
-            transform: translateY(-2px);
         }
 
-        /* Provider-specific hero card */
-        .hero-provider-card {
-            background: rgba(37,99,235,0.10);
-            border: 1px solid rgba(37,99,235,0.25);
-            border-radius: 16px;
-            padding: 20px 28px;
-            display: inline-flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 40px;
-            animation: fadeSlideDown 0.7s ease 0.25s both;
-            backdrop-filter: blur(10px);
-        }
-        .hero-provider-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-        .hero-provider-text { text-align: left; }
-        .hero-provider-text h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
-        .hero-provider-text p { font-size: 13px; color: rgba(255,255,255,0.55); }
-
-        /* Stats */
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            animation: fadeSlideDown 0.7s ease 0.4s both;
-        }
-        .stat-divider {
-            width: 1px;
-            background: rgba(255,255,255,0.10);
-            margin: 0 32px;
-            align-self: stretch;
-        }
-        .hero-stat { text-align: center; }
-        .hero-stat-num {
-            font-family: 'Outfit', sans-serif;
-            font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--blue2), var(--violet2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.1;
-        }
-        .hero-stat-label {
-            font-size: 12px;
-            color: rgba(255,255,255,0.45);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-top: 4px;
-        }
-
-        /* Scroll indicator */
-        .scroll-indicator {
+        .hero__scroll {
             position: absolute;
-            bottom: 32px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--fn-text-3);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            opacity: 0.4;
-            animation: scrollBounce 2s ease-in-out infinite;
-            z-index: 2;
-        }
-        .scroll-indicator span { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
-        .scroll-arrow { width: 20px; height: 20px; border-right: 2px solid white; border-bottom: 2px solid white; transform: rotate(45deg); }
-        @keyframes scrollBounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(8px); }
         }
 
-        /* ─── Trust Strip ─── */
-        .trust-strip {
-            background: rgba(255,255,255,0.025);
-            border-top: 1px solid var(--glass-border);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 16px 40px;
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            flex-wrap: wrap;
-            overflow: hidden;
+        .hero__scroll-line {
+            width: 1px;
+            height: 40px;
+            background: var(--fn-border);
+            animation: scrollLine 1.5s ease-in-out infinite;
         }
-        .trust-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.55);
-            white-space: nowrap;
-        }
-        .trust-item-icon {
-            width: 28px; height: 28px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
-        }
-        .trust-item-icon.blue { background: rgba(37,99,235,0.2); }
-        .trust-item-icon.violet { background: rgba(124,58,237,0.2); }
-        .trust-item-icon.cyan { background: rgba(6,182,212,0.2); }
-        .trust-item-icon.green { background: rgba(16,185,129,0.2); }
 
-        /* ─── Section Common ─── */
-        .section {
-            padding: 96px 40px;
-            max-width: 1200px;
-            margin: 0 auto;
+        @keyframes scrollLine {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            51% { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
         }
-        .section-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--blue2);
-            margin-bottom: 16px;
-        }
-        .section-label::before {
-            content: '';
-            width: 20px; height: 2px;
-            background: linear-gradient(90deg, var(--blue), var(--violet));
-            border-radius: 1px;
-        }
-        .section-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: clamp(28px, 4vw, 44px);
-            font-weight: 800;
-            color: var(--white);
-            margin-bottom: 14px;
-            letter-spacing: -1px;
-            line-height: 1.15;
-        }
-        .section-sub {
-            font-size: 16px;
-            color: rgba(255,255,255,0.45);
-            max-width: 500px;
-            line-height: 1.7;
-        }
-        .section-header { margin-bottom: 56px; }
 
-        /* ─── Services Section ─── */
+        /* ── Services Section ───────────────────────────────── */
         .services-section {
-            background: var(--navy);
-            padding: 96px 0;
+            padding: var(--fn-pad-section) 0;
+            border-top: 1px solid var(--fn-border);
         }
-        .services-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
 
-        .categories-grid {
+        .services-header {
+            margin-bottom: 48px;
+        }
+
+        .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 16px;
-        }
-        .cat-card {
-            background: rgba(255,255,255,0.035);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            padding: 28px 16px 22px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--white);
-            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: block;
-            position: relative;
-            overflow: hidden;
-        }
-        .cat-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(124,58,237,0.08));
-            opacity: 0;
-            transition: opacity 0.28s;
-        }
-        .cat-card:hover {
-            border-color: rgba(37,99,235,0.4);
-            box-shadow: 0 0 0 1px rgba(37,99,235,0.2), 0 12px 40px rgba(37,99,235,0.2);
-            transform: translateY(-6px) scale(1.02);
-        }
-        .cat-card:hover::before { opacity: 1; }
-        .cat-icon {
-            width: 58px; height: 58px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(124,58,237,0.2));
-            border: 1px solid rgba(37,99,235,0.25);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px;
-            margin: 0 auto 14px;
-            transition: all 0.28s;
-            position: relative; z-index: 1;
-        }
-        .cat-card:hover .cat-icon {
-            background: linear-gradient(135deg, rgba(37,99,235,0.35), rgba(124,58,237,0.35));
-            box-shadow: 0 0 20px rgba(37,99,235,0.3);
-            transform: scale(1.1);
-        }
-        .cat-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.8);
-            line-height: 1.3;
-            position: relative; z-index: 1;
+            gap: 14px;
         }
 
-        /* ─── How It Works ─── */
-        .how-section {
-            background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%);
-            padding: 96px 0;
-            position: relative;
+        .service-card {
+            background: var(--fn-bg-card);
+            border: 1px solid var(--fn-border);
+            border-radius: 14px;
+            padding: 24px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--fn-text-1);
+            transition: border-color 0.2s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
-        .how-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+
+        .service-card:hover {
+            border-color: var(--fn-text-1);
+            transform: translateY(-3px);
+        }
+
+        .service-card__icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--fn-bg);
+            border: 1px solid var(--fn-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .service-card__icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--fn-text-1);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .service-card__name {
+            font-family: var(--fn-font-head);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--fn-text-1);
+            line-height: 1.3;
+        }
+
+        /* ── How It Works ───────────────────────────────────── */
+        .how-section {
+            padding: var(--fn-pad-section) 0;
+            border-top: 1px solid var(--fn-border);
+        }
+
+        .how-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .how-left__heading {
+            font-family: var(--fn-font-head);
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            color: var(--fn-text-1);
+            margin-bottom: 20px;
+            margin-top: 12px;
+        }
+
+        .how-left__sub {
+            font-size: 16px;
+            color: var(--fn-text-2);
+            line-height: 1.7;
+            max-width: 380px;
+        }
+
         .how-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            position: relative;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
         }
-        /* Connector line */
-        .how-grid::before {
-            content: '';
-            position: absolute;
-            top: 52px;
-            left: calc(33.33% - 20px);
-            right: calc(33.33% - 20px);
-            height: 2px;
-            background: linear-gradient(90deg, var(--blue), var(--violet));
-            opacity: 0.3;
-            z-index: 0;
-        }
+
         .how-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 20px;
-            padding: 36px 28px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-            transition: all 0.3s;
-        }
-        .how-card:hover {
-            background: rgba(255,255,255,0.055);
-            border-color: rgba(37,99,235,0.3);
-            transform: translateY(-4px);
-            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
-        }
-        .how-num {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            color: var(--white);
-            font-family: 'Outfit', sans-serif;
-            font-size: 20px;
-            font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 24px;
-            box-shadow: 0 0 0 8px rgba(37,99,235,0.1), 0 8px 24px rgba(37,99,235,0.3);
-        }
-        .how-card h3 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 19px;
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: 12px;
-        }
-        .how-card p {
-            font-size: 14px;
-            color: rgba(255,255,255,0.45);
-            line-height: 1.75;
+            background: var(--fn-bg-card);
+            border: 1px solid var(--fn-border);
+            border-radius: 14px;
+            padding: 22px;
+            transition: border-color 0.2s;
         }
 
-        /* ─── Provider CTA Banner ─── */
-        .provider-cta {
-            margin: 0 40px;
-            max-width: 1120px;
-            margin-left: auto;
-            margin-right: auto;
-            background: linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(124,58,237,0.15) 100%);
-            border: 1px solid rgba(37,99,235,0.25);
-            border-radius: 24px;
-            padding: 56px 60px;
+        .how-card:hover { border-color: var(--fn-accent); }
+
+        .how-card__icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--fn-bg);
+            border: 1px solid var(--fn-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .how-card__icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--fn-text-1);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .how-card__title {
+            font-family: var(--fn-font-head);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--fn-text-1);
+            margin-bottom: 8px;
+        }
+
+        .how-card__desc {
+            font-size: 13px;
+            color: var(--fn-text-2);
+            line-height: 1.6;
+        }
+
+        /* ── CTA Section ────────────────────────────────────── */
+        .cta-section {
+            padding: var(--fn-pad-section) 0;
+            border-top: 1px solid var(--fn-border);
+        }
+
+        .cta-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 32px;
+            gap: 40px;
             flex-wrap: wrap;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
         }
-        .provider-cta::before {
-            content: '';
-            position: absolute;
-            top: -60%; right: -10%;
-            width: 400px; height: 400px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .cta-left { position: relative; z-index: 1; }
-        .cta-left h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 32px;
+
+        .cta-left__heading {
+            font-family: var(--fn-font-head);
+            font-size: clamp(28px, 4vw, 48px);
             font-weight: 800;
-            color: var(--white);
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: var(--fn-text-1);
+            margin-top: 10px;
+            margin-bottom: 16px;
         }
-        .cta-left p {
+
+        .cta-left__sub {
             font-size: 15px;
-            color: rgba(255,255,255,0.55);
-            max-width: 440px;
+            color: var(--fn-text-2);
             line-height: 1.7;
-        }
-        .cta-right { position: relative; z-index: 1; }
-        .btn-cta {
-            padding: 16px 36px;
-            background: linear-gradient(135deg, var(--blue), var(--violet));
-            color: var(--white);
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 32px rgba(37,99,235,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
-            transition: all 0.25s;
-            white-space: nowrap;
-        }
-        .btn-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 48px rgba(37,99,235,0.55);
-            filter: brightness(1.1);
+            max-width: 420px;
         }
 
-        /* ─── Footer ─── */
-        .footer {
-            background: rgba(5,13,31,0.9);
-            border-top: 1px solid var(--glass-border);
-            padding: 32px 48px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .footer-logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 20px;
-            font-weight: 800;
-            text-decoration: none;
-            color: var(--white);
-        }
-        .footer-logo span {
-            background: linear-gradient(135deg, var(--blue2), var(--violet2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .footer-copy {
-            font-size: 13px;
-            color: rgba(255,255,255,0.3);
-        }
-        .footer-links { display: flex; gap: 20px; }
-        .footer-links a {
-            font-size: 13px;
-            color: rgba(255,255,255,0.35);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .footer-links a:hover { color: var(--blue2); }
-
-        /* ─── Animations ─── */
-        @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
-        .reveal-delay-3 { transition-delay: 0.3s; }
-
-        /* ─── Responsive ─── */
         @media (max-width: 900px) {
+            .hero { padding: 100px 20px 80px; }
+            .how-inner { grid-template-columns: 1fr; gap: 40px; }
+            .how-grid { grid-template-columns: 1fr 1fr; }
+            .cta-inner { flex-direction: column; align-items: flex-start; }
+        }
+
+        @media (max-width: 600px) {
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
             .how-grid { grid-template-columns: 1fr; }
-            .how-grid::before { display: none; }
-            .provider-cta { padding: 36px 28px; text-align: center; justify-content: center; }
-            .cta-left h2 { font-size: 24px; }
-        }
-        @media (max-width: 768px) {
-            .navbar { padding: 0 20px; }
-            .hero { padding: 100px 20px 60px; }
-            .hero-stats { gap: 0; }
-            .stat-divider { margin: 0 20px; }
-            .trust-strip { gap: 20px; padding: 14px 20px; }
-            .services-inner, .how-inner { padding: 0 20px; }
-            .section { padding: 64px 20px; }
-            .categories-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .footer { flex-direction: column; text-align: center; padding: 28px 20px; }
-            .provider-cta { margin: 0 20px; }
-        }
-        @media (max-width: 480px) {
-            .hero-stats { flex-direction: column; gap: 24px; }
-            .stat-divider { display: none; }
-            .hero-title { letter-spacing: -1px; }
-            .hero-badge { font-size: 12px; }
+            .hero__btns { flex-direction: column; align-items: center; }
+            .hero__scroll { display: none; }
         }
     </style>
 </head>
 <body>
 
-<!-- ═══ Navbar ═══ -->
-<nav class="navbar" id="mainNav">
-    <a href="{% url 'home' %}" class="logo">Fix<span>Now</span></a>
-    <div class="nav-links">
-        {% if request.user.is_authenticated %}
-            <span class="nav-user">👋 {{ request.user.first_name|default:request.user.email }}</span>
-            {% if request.user.user_type == 'customer' %}
-                <a href="{% url 'customer_dashboard' %}" class="btn btn-ghost">My Bookings</a>
-            {% elif request.user.user_type == 'provider' %}
-                <a href="{% url 'provider_dashboard' %}" class="btn btn-nav-dashboard">⚡ My Dashboard</a>
-            {% endif %}
-            <a href="{% url 'user_logout' %}" class="btn btn-ghost">Logout</a>
-        {% else %}
-            <a href="{% url 'user_login' %}" class="btn btn-ghost">Login</a>
-            <a href="{% url 'customer_register' %}" class="btn btn-primary">Get Started Free →</a>
-        {% endif %}
+<!-- Navbar -->
+<nav class="fn-navbar">
+    <a href="{% url 'home' %}" class="fn-navbar__logo">FixNow</a>
+    <div class="fn-navbar__links">
+        <a href="{% url 'user_login' %}" class="fn-navbar__link">Login</a>
+        <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-sm">Get Started</a>
     </div>
 </nav>
 
-<!-- ═══ Hero ═══ -->
+<!-- Hero -->
 <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="hero-grid"></div>
-    <canvas id="particles"></canvas>
-
-    <div class="hero-content">
-        <div class="hero-badge">
-            <div class="hero-badge-dot"></div>
-            🏠 Kerala's #1 Home Services Platform
-        </div>
-
-        <h1 class="hero-title">
-            Home Services,<br>
-            <span class="gradient-text">At Your Doorstep</span>
-        </h1>
-
-        <p class="hero-subtitle">
-            Book trusted local professionals for plumbing, electrical, AC repair,
-            cleaning and more — in just a few clicks.
-        </p>
-
-        <!-- Provider-specific dashboard card -->
-        {% if request.user.is_authenticated and request.user.user_type == 'provider' %}
-        <div class="hero-provider-card">
-            <div class="hero-provider-icon">⚡</div>
-            <div class="hero-provider-text">
-                <h3>Welcome back, {{ request.user.first_name|default:"Provider" }}!</h3>
-                <p>Manage bookings and update your profile from your dashboard</p>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="hero-actions">
-            {% if request.user.is_authenticated %}
-                {% if request.user.user_type == 'customer' %}
-                    <a href="#services" class="btn-hero-primary">🔍 Browse Services</a>
-                    <a href="{% url 'customer_dashboard' %}" class="btn-hero-secondary">My Bookings →</a>
-                {% elif request.user.user_type == 'provider' %}
-                    <a href="{% url 'provider_dashboard' %}" class="btn-hero-primary">⚡ Go to Dashboard</a>
-                    <a href="#services" class="btn-hero-secondary">View Services →</a>
-                {% else %}
-                    <a href="#services" class="btn-hero-primary">🔍 Browse Services</a>
-                {% endif %}
-            {% else %}
-                <a href="{% url 'customer_register' %}" class="btn-hero-primary">🚀 Book a Service</a>
-                <a href="{% url 'provider_register' %}" class="btn-hero-secondary">Join as Provider →</a>
-            {% endif %}
-        </div>
-
-        <div class="hero-stats">
-            <div class="hero-stat">
-                <div class="hero-stat-num">500+</div>
-                <div class="hero-stat-label">Happy Customers</div>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="hero-stat">
-                <div class="hero-stat-num">50+</div>
-                <div class="hero-stat-label">Verified Providers</div>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="hero-stat">
-                <div class="hero-stat-num">10+</div>
-                <div class="hero-stat-label">Service Categories</div>
-            </div>
-        </div>
+    <h1 class="hero__headline">
+        Home Services,<br>
+        At Your <span class="fn-highlight">Doorstep.</span>
+    </h1>
+    <p class="hero__sub">
+        Book trusted local professionals for plumbing, electrical,
+        AC repair, cleaning and more — right in your area.
+    </p>
+    <div class="hero__btns">
+        <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-lg">Book a Service</a>
+        <a href="{% url 'provider_register' %}" class="fn-btn fn-btn-secondary fn-btn-lg">Join as Provider</a>
     </div>
-
-    <div class="scroll-indicator">
-        <span>Scroll</span>
-        <div class="scroll-arrow"></div>
+    <div class="hero__scroll">
+        Scroll
+        <span class="hero__scroll-line"></span>
     </div>
 </section>
 
-<!-- ═══ Trust Strip ═══ -->
-<div class="trust-strip">
-    <div class="trust-item">
-        <div class="trust-item-icon blue">✅</div>
-        Verified Professionals
-    </div>
-    <div class="trust-item">
-        <div class="trust-item-icon cyan">⚡</div>
-        Same-Day Booking
-    </div>
-    <div class="trust-item">
-        <div class="trust-item-icon violet">🛡️</div>
-        Secure Payments
-    </div>
-    <div class="trust-item">
-        <div class="trust-item-icon green">⭐</div>
-        4.8★ Customer Rated
-    </div>
-</div>
-
-<!-- ═══ Services ═══ -->
-<div class="services-section" id="services">
-    <div class="services-inner">
-        <div class="section-header reveal">
-            <div class="section-label">Services</div>
-            <h2 class="section-title">Everything for Your Home</h2>
-            <p class="section-sub">Choose from a wide range of trusted home services delivered by verified experts</p>
+<!-- Services -->
+<section class="services-section">
+    <div class="fn-container">
+        <div class="services-header">
+            <span class="fn-section-label">Our Services</span>
+            <h2 class="fn-display fn-display-md">What do you need fixed?</h2>
         </div>
-        <div class="categories-grid">
+        <div class="services-grid">
             {% for category in categories %}
-            <a href="{% url 'service_category' category.slug %}" class="cat-card reveal" style="transition-delay: {{ forloop.counter0 }}00ms">
-                <div class="cat-icon">🔧</div>
-                <div class="cat-name">{{ category.name }}</div>
+            <a href="{% url 'service_category' category.slug %}" class="service-card">
+                <div class="service-card__icon">
+                    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                </div>
+                <span class="service-card__name">{{ category.name }}</span>
             </a>
             {% empty %}
-            <p style="color:rgba(255,255,255,0.3); text-align:center; grid-column:1/-1; padding:48px 0; font-size:15px;">
-                No services available yet. Check back soon!
-            </p>
+            <p style="grid-column:1/-1; color:var(--fn-text-3); font-size:14px;">No services listed yet.</p>
             {% endfor %}
         </div>
     </div>
-</div>
+</section>
 
-<!-- ═══ How It Works ═══ -->
-<div class="how-section">
-    <div class="how-inner">
-        <div class="section-header reveal" style="text-align:center;">
-            <div class="section-label" style="justify-content:center;">How It Works</div>
-            <h2 class="section-title">Book in 3 Simple Steps</h2>
-            <p class="section-sub" style="margin:0 auto;">From choosing a service to getting the job done — it's fast, easy and transparent</p>
-        </div>
-        <div class="how-grid">
-            <div class="how-card reveal">
-                <div class="how-num">1</div>
-                <h3>Choose a Service</h3>
-                <p>Browse our service categories and find what you need. Filter by your pincode to see providers available near you.</p>
+<!-- How It Works -->
+<section class="how-section">
+    <div class="fn-container">
+        <div class="how-inner">
+            <div class="how-left">
+                <span class="fn-section-label">How It Works</span>
+                <h2 class="how-left__heading">Book a service<br>in minutes.</h2>
+                <p class="how-left__sub">
+                    Find verified local professionals, pick a time that works,
+                    and track your job from start to finish.
+                </p>
             </div>
-            <div class="how-card reveal reveal-delay-1">
-                <div class="how-num">2</div>
-                <h3>Book a Provider</h3>
-                <p>View verified provider profiles, ratings and reviews. Pick the best match and schedule a convenient time slot.</p>
-            </div>
-            <div class="how-card reveal reveal-delay-2">
-                <div class="how-num">3</div>
-                <h3>Get it Done</h3>
-                <p>The provider arrives at your door and completes the job. Rate their service to help the community.</p>
+            <div class="how-right">
+                <div class="how-grid">
+                    <div class="how-card">
+                        <div class="how-card__icon">
+                            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        </div>
+                        <div class="how-card__title">Browse Services</div>
+                        <div class="how-card__desc">Enter your pin code and find verified professionals near you.</div>
+                    </div>
+                    <div class="how-card">
+                        <div class="how-card__icon">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <div class="how-card__title">View Profiles</div>
+                        <div class="how-card__desc">See ratings, experience and reviews before you decide.</div>
+                    </div>
+                    <div class="how-card">
+                        <div class="how-card__icon">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        <div class="how-card__title">Book a Slot</div>
+                        <div class="how-card__desc">Pick a date and time that works for you. Simple and fast.</div>
+                    </div>
+                    <div class="how-card">
+                        <div class="how-card__icon">
+                            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="how-card__title">Track Your Job</div>
+                        <div class="how-card__desc">Get real-time updates from request to completion.</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- ═══ Provider CTA ═══ -->
-<div style="padding: 64px 40px; background: var(--navy2);">
-    <div class="provider-cta reveal">
-        <div class="cta-left">
-            <h2>Are you a service professional?</h2>
-            <p>Join FixNow, get verified, and start receiving bookings from customers in your area. Build your reputation and grow your business.</p>
-        </div>
-        <div class="cta-right">
-            <a href="{% url 'provider_register' %}" class="btn-cta">
-                Register as Provider →
-            </a>
+<!-- Provider CTA -->
+<section class="cta-section">
+    <div class="fn-container">
+        <div class="cta-inner">
+            <div class="cta-left">
+                <span class="fn-section-label">For Professionals</span>
+                <h2 class="cta-left__heading">Are you a service<br>professional?</h2>
+                <p class="cta-left__sub">
+                    Join FixNow and start receiving bookings from customers
+                    in your area. Free to register. Approved within 24 hours.
+                </p>
+            </div>
+            <div class="cta-right">
+                <a href="{% url 'provider_register' %}" class="fn-btn fn-btn-primary fn-btn-lg">
+                    Register as Provider
+                </a>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- ═══ Footer ═══ -->
-<footer class="footer">
-    <a href="{% url 'home' %}" class="footer-logo">Fix<span>Now</span></a>
-    <div class="footer-copy">© 2026 FixNow. Built for Kerala.</div>
-    <div class="footer-links">
-        <a href="mailto:fixnow@gmail.com">Contact</a>
-        <a href="{% url 'provider_register' %}">Become a Provider</a>
-    </div>
+<!-- Footer -->
+<footer class="fn-footer">
+    <span class="fn-footer__logo">FixNow</span>
+    <span class="fn-footer__copy">
+        © 2026 FixNow · Built by
+        <a href="https://abhijithp.vercel.app/" target="_blank" rel="noopener">Abhijith P</a>
+    </span>
 </footer>
-
-<script>
-// ── Navbar scroll effect
-const nav = document.getElementById('mainNav');
-window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 20);
-});
-
-// ── Scroll reveal
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-        if (e.isIntersecting) {
-            e.target.classList.add('visible');
-        }
-    });
-}, { threshold: 0.12 });
-reveals.forEach(r => observer.observe(r));
-
-// ── Particle canvas
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
-
-const particles = [];
-const COUNT = 60;
-
-for (let i = 0; i < COUNT; i++) {
-    particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 1.5 + 0.3,
-        dx: (Math.random() - 0.5) * 0.3,
-        dy: (Math.random() - 0.5) * 0.3,
-        alpha: Math.random() * 0.5 + 0.1,
-        color: Math.random() > 0.5 ? '#3b82f6' : '#a855f7'
-    });
-}
-
-function drawParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        ctx.fill();
-
-        p.x += p.dx;
-        p.y += p.dy;
-
-        // Bounce
-        if (p.x < 0 || p.x > canvas.width)  p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-    }
-
-    // Draw connecting lines between close particles
-    ctx.globalAlpha = 1;
-    for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 100) {
-                ctx.beginPath();
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.strokeStyle = `rgba(59,130,246,${0.06 * (1 - dist/100)})`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-        }
-    }
-
-    requestAnimationFrame(drawParticles);
-}
-drawParticles();
-</script>
 
 </body>
 </html>
