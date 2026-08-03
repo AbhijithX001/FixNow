@@ -6,46 +6,22 @@
 {% block nav_confirmed %}{% if status_filter == 'confirmed' or status_filter == 'in_progress' %}active{% endif %}{% endblock %}
 {% block nav_history %}{% if status_filter == 'completed' or status_filter == 'rejected' or status_filter == 'cancelled' %}active{% endif %}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-    .filter-btn { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); background: var(--glass-bg); border: 1px solid var(--glass-border); text-decoration: none; transition: all 0.2s; }
-    .filter-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .filter-active { background: rgba(37,99,235,0.2); color: var(--blue2); border-color: rgba(37,99,235,0.4); }
-    .filter-active:hover { background: rgba(37,99,235,0.3); color: #fff; }
-    
-    .table-container { overflow-x: auto; }
-    .fn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .fn-table th { padding: 16px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); border-bottom: 1px solid var(--glass-border); }
-    .fn-table td { padding: 16px; color: rgba(255,255,255,0.8); border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
-    .fn-table tbody tr:last-child td { border-bottom: none; }
-    .fn-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-    
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-pending { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-    .badge-confirmed { background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); }
-    .badge-in_progress { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
-    .badge-completed { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-    .badge-rejected, .badge-cancelled { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
-    
-    .btn-view { padding: 6px 14px; background: rgba(37,99,235,0.15); color: #93c5fd; border: 1px solid rgba(37,99,235,0.3); border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .btn-view:hover { background: rgba(37,99,235,0.3); color: #fff; }
-</style>
-{% endblock %}
-
 {% block content %}
-<h1 class="page-title">My Bookings</h1>
-
-<div class="filter-bar">
-    <a href="{% url 'provider_booking_list' %}" class="filter-btn {% if not status_filter %}filter-active{% endif %}">All</a>
-    <a href="?status=pending" class="filter-btn {% if status_filter == 'pending' %}filter-active{% endif %}">New Requests</a>
-    <a href="?status=confirmed" class="filter-btn {% if status_filter == 'confirmed' %}filter-active{% endif %}">Confirmed</a>
-    <a href="?status=in_progress" class="filter-btn {% if status_filter == 'in_progress' %}filter-active{% endif %}">In Progress</a>
-    <a href="?status=completed" class="filter-btn {% if status_filter == 'completed' %}filter-active{% endif %}">Completed</a>
-    <a href="?status=rejected" class="filter-btn {% if status_filter == 'rejected' %}filter-active{% endif %}">Rejected</a>
+<div class="fn-page-header">
+    <span class="fn-section-label">Job Management</span>
+    <h1 class="fn-display fn-display-sm">My Bookings</h1>
 </div>
 
-<div class="glass-card table-container" style="padding: 0;">
+<div class="fn-filter-bar">
+    <a href="{% url 'provider_booking_list' %}" class="fn-filter-btn {% if not status_filter %}fn-filter-active{% endif %}">All</a>
+    <a href="?status=pending" class="fn-filter-btn {% if status_filter == 'pending' %}fn-filter-active{% endif %}">New Requests</a>
+    <a href="?status=confirmed" class="fn-filter-btn {% if status_filter == 'confirmed' %}fn-filter-active{% endif %}">Confirmed</a>
+    <a href="?status=in_progress" class="fn-filter-btn {% if status_filter == 'in_progress' %}fn-filter-active{% endif %}">In Progress</a>
+    <a href="?status=completed" class="fn-filter-btn {% if status_filter == 'completed' %}fn-filter-active{% endif %}">Completed</a>
+    <a href="?status=rejected" class="fn-filter-btn {% if status_filter == 'rejected' %}fn-filter-active{% endif %}">Rejected</a>
+</div>
+
+<div class="fn-table-wrap">
     <table class="fn-table">
         <thead>
             <tr>
@@ -61,19 +37,19 @@
         <tbody>
             {% for booking in bookings %}
             <tr>
-                <td style="color: rgba(255,255,255,0.5);">#{{ booking.id }}</td>
+                <td style="color: var(--fn-text-3);">#{{ booking.id }}</td>
                 <td>
-                    <strong style="color: #fff;">{{ booking.customer.get_full_name|default:booking.customer.email }}</strong><br>
-                    <small style="color: rgba(255,255,255,0.4);">{{ booking.customer.phone|default:"" }}</small>
+                    <strong style="color: var(--fn-text-1);">{{ booking.customer.get_full_name|default:booking.customer.email }}</strong><br>
+                    <small style="color: var(--fn-text-3);">{{ booking.customer.phone|default:"" }}</small>
                 </td>
                 <td>{{ booking.category.name|default:"-" }}</td>
                 <td>
                     {{ booking.scheduled_date|date:"M d, Y" }}<br>
-                    <small style="color: rgba(255,255,255,0.4);">{{ booking.scheduled_time }}</small>
+                    <small style="color: var(--fn-text-3);">{{ booking.scheduled_time }}</small>
                 </td>
                 <td style="max-width:200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ booking.address }}">{{ booking.address }}</td>
                 <td>
-                    <span class="badge badge-{{ booking.status }}">
+                    <span class="fn-badge fn-badge-{{ booking.status }}">
                         {% if booking.status == 'pending' %}New Request
                         {% elif booking.status == 'in_progress' %}In Progress
                         {% else %}{{ booking.status|title }}
@@ -81,12 +57,14 @@
                     </span>
                 </td>
                 <td>
-                    <a href="{% url 'provider_booking_detail' booking.id %}" class="btn-view">View →</a>
+                    <a href="{% url 'provider_booking_detail' booking.id %}" class="fn-btn fn-btn-ghost fn-btn-sm">View →</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align:center; padding:40px; color:rgba(255,255,255,0.3);">No bookings found matching this criteria.</td>
+                <td colspan="7" class="fn-empty" style="padding: 60px 20px;">
+                    <div class="fn-empty-sub">No bookings found matching this criteria.</div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

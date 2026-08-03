@@ -278,8 +278,17 @@
 <nav class="fn-navbar">
     <a href="{% url 'home' %}" class="fn-navbar__logo">FixNow</a>
     <div class="fn-navbar__links">
-        <a href="{% url 'user_login' %}" class="fn-navbar__link">Login</a>
-        <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-sm">Get Started</a>
+        {% if request.user.is_authenticated %}
+            {% if request.user.user_type == 'provider' %}
+                <a href="{% url 'provider_dashboard' %}" class="fn-navbar__link">Dashboard</a>
+            {% else %}
+                <a href="{% url 'customer_dashboard' %}" class="fn-navbar__link">My Bookings</a>
+            {% endif %}
+            <a href="{% url 'user_logout' %}" class="fn-btn fn-btn-primary fn-btn-sm">Logout</a>
+        {% else %}
+            <a href="{% url 'user_login' %}" class="fn-navbar__link">Login</a>
+            <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-sm">Get Started</a>
+        {% endif %}
     </div>
 </nav>
 
@@ -294,8 +303,16 @@
         AC repair, cleaning and more — right in your area.
     </p>
     <div class="hero__btns">
-        <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-lg">Book a Service</a>
-        <a href="{% url 'provider_register' %}" class="fn-btn fn-btn-secondary fn-btn-lg">Join as Provider</a>
+        {% if request.user.is_authenticated %}
+            {% if request.user.user_type == 'provider' %}
+                <a href="{% url 'provider_dashboard' %}" class="fn-btn fn-btn-primary fn-btn-lg">Go to Dashboard</a>
+            {% else %}
+                <a href="#services" class="fn-btn fn-btn-primary fn-btn-lg">Browse Services</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'customer_register' %}" class="fn-btn fn-btn-primary fn-btn-lg">Book a Service</a>
+            <a href="{% url 'provider_register' %}" class="fn-btn fn-btn-secondary fn-btn-lg">Join as Provider</a>
+        {% endif %}
     </div>
     <div class="hero__scroll">
         Scroll
@@ -304,7 +321,7 @@
 </section>
 
 <!-- Services -->
-<section class="services-section">
+<section id="services" class="services-section">
     <div class="fn-container">
         <div class="services-header">
             <span class="fn-section-label">Our Services</span>

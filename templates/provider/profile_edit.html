@@ -4,133 +4,94 @@
 {% block title %}Edit Profile | FixNow Provider{% endblock %}
 {% block nav_profile %}active{% endblock %}
 
-{% block extra_css %}
-<style>
-    .page-title { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 2px; }
-    .page-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin: 0; }
-    
-    .form-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; margin-top: 24px; }
-    
-    .card-header { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
-    
-    .field { margin-bottom: 20px; }
-    .field-inline { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; }
-    .label { display: block; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
-    
-    .input { width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; font-size: 14px; color: #fff; box-sizing: border-box; transition: all 0.2s; font-family: 'Inter', sans-serif; }
-    .input:focus { outline: none; border-color: rgba(37,99,235,0.5); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
-    .input::placeholder { color: rgba(255,255,255,0.2); }
-    
-    .pincode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-    .pincode-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-    .pincode-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(37,99,235,0.3); }
-    .pincode-item input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--blue); }
-    .pincode-label { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.4; }
-    
-    .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--blue), var(--blue2)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.4); }
-    
-    .info-list { padding: 4px 0; }
-    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 500; }
-    .info-value { font-size: 13.5px; color: #fff; font-weight: 600; text-align: right; }
-    
-    .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-approved { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-    .badge-pending { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-    .badge-suspended { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
-    
-    @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
-</style>
-{% endblock %}
-
 {% block content %}
-
-<div>
-    <h1 class="page-title">Edit Profile</h1>
-    <p class="page-sub">Update your provider profile and service areas</p>
+<div class="fn-page-header">
+    <span class="fn-section-label">Settings</span>
+    <h1 class="fn-display fn-display-sm">Edit Profile</h1>
+    <p class="fn-page-sub">Update your provider profile and service areas</p>
 </div>
 
-<div class="form-grid">
-    <div class="glass-card">
-        <div class="card-header">Profile Details</div>
+<div class="fn-two-col" style="align-items: flex-start; gap: 40px; grid-template-columns: 1fr 340px;">
+    <div class="fn-card">
+        <h3 class="fn-display" style="font-size: 18px; margin-bottom: 24px;">Profile Details</h3>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="field">
-                <label class="label">Bio</label>
-                <textarea name="bio" class="input" rows="4" placeholder="Tell customers about yourself and your experience...">{{ provider.bio }}</textarea>
+            
+            <div class="fn-field">
+                <label class="fn-label">Bio</label>
+                <textarea name="bio" class="fn-input" rows="4" placeholder="Tell customers about yourself and your experience...">{{ provider.bio }}</textarea>
             </div>
-            <div class="field">
-                <label class="label">Years of Experience</label>
-                <input type="number" name="experience_years" class="input" value="{{ provider.experience_years }}" min="0" max="50">
+            
+            <div class="fn-field">
+                <label class="fn-label">Years of Experience</label>
+                <input type="number" name="experience_years" class="fn-input" value="{{ provider.experience_years }}" min="0" max="50">
             </div>
-            <div class="field">
-                <label class="label">Profile Photo</label>
+            
+            <div class="fn-field">
+                <label class="fn-label">Profile Photo</label>
                 {% if provider.profile_photo %}
                 <div style="margin-bottom:12px; display:flex; align-items:center; gap:12px;">
-                    <img src="{{ provider.profile_photo.url }}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,255,255,0.1);">
-                    <span style="font-size:13px; color:rgba(255,255,255,0.5);">Current Photo</span>
+                    <img src="{{ provider.profile_photo.url }}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border: 2px solid var(--fn-border);">
+                    <span style="font-size:13px; color:var(--fn-text-3);">Current Photo</span>
                 </div>
                 {% endif %}
-                <input type="file" name="profile_photo" class="input" accept="image/*" style="padding: 9px 12px;">
+                <input type="file" name="profile_photo" class="fn-input" accept="image/*" style="padding: 9px 12px;">
             </div>
-            <label class="field-inline">
-                <input type="checkbox" name="is_available" id="is_available" {% if provider.is_available %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--blue);">
-                <span style="font-size:14px; color:#fff; font-weight:500;">I am currently available for bookings</span>
+            
+            <label style="display: flex; align-items: center; gap: 10px; padding: 16px; border: 1px solid var(--fn-border); border-radius: 10px; cursor: pointer; background: var(--fn-bg);">
+                <input type="checkbox" name="is_available" id="is_available" {% if provider.is_available %}checked{% endif %} style="width: 16px; height: 16px; accent-color: var(--fn-accent-dark);">
+                <span style="font-size:14px; font-weight:600;">I am currently available for bookings</span>
             </label>
 
-            <div class="card-header" style="margin: 32px 0 16px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.04);">
-                Service Areas (Pincodes)
-            </div>
-            <div class="pincode-grid">
+            <h3 class="fn-display" style="font-size: 18px; margin: 32px 0 24px;">Service Areas (Pincodes)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
                 {% for pin in all_pincodes %}
-                <label class="pincode-item">
+                <label style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--fn-border); border-radius: 10px; cursor: pointer; transition: all 0.2s;">
                     <input type="checkbox" name="pincodes" value="{{ pin.id }}"
-                        {% if pin in provider.service_pincodes.all %}checked{% endif %}>
-                    <span class="pincode-label">
-                        <strong style="color: #fff;">{{ pin.pincode }}</strong><br>
-                        <small style="color: rgba(255,255,255,0.4);">{{ pin.area_name }}, {{ pin.district }}</small>
+                        {% if pin in provider.service_pincodes.all %}checked{% endif %} style="margin-top: 3px; accent-color: var(--fn-accent-dark);">
+                    <span>
+                        <strong style="color: var(--fn-text-1); font-size: 13px;">{{ pin.pincode }}</strong><br>
+                        <small style="color: var(--fn-text-3); font-size: 12px;">{{ pin.area_name }}, {{ pin.district }}</small>
                     </span>
                 </label>
                 {% empty %}
-                <p style="color:rgba(255,255,255,0.3); font-size:14px;">No pincodes available. Ask admin to add service areas.</p>
+                <p style="color:var(--fn-text-3); font-size:14px;">No pincodes available. Ask admin to add service areas.</p>
                 {% endfor %}
             </div>
 
             <div style="margin-top:32px;">
-                <button type="submit" class="submit-btn">Save Changes</button>
+                <button type="submit" class="fn-btn fn-btn-primary fn-btn-full">Save Changes</button>
             </div>
         </form>
     </div>
 
     <div>
-        <div class="glass-card">
-            <div class="card-header" style="margin-bottom: 16px;">Account Info</div>
-            <div class="info-list">
-                <div class="info-row">
-                    <span class="info-label">Name</span>
-                    <span class="info-value">{{ provider.user.get_full_name }}</span>
+        <div class="fn-card">
+            <h3 class="fn-display" style="font-size: 18px; margin-bottom: 24px;">Account Info</h3>
+            <div>
+                <div class="fn-info-row" style="padding-top: 0;">
+                    <span class="fn-info-label">Name</span>
+                    <span class="fn-info-value">{{ provider.user.get_full_name }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Email</span>
-                    <span class="info-value">{{ provider.user.email }}</span>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Email</span>
+                    <span class="fn-info-value">{{ provider.user.email }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Phone</span>
-                    <span class="info-value">{{ provider.user.phone|default:"Not set" }}</span>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Phone</span>
+                    <span class="fn-info-value">{{ provider.user.phone|default:"Not set" }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Category</span>
-                    <span class="info-value">{{ provider.category.name|default:"Pending" }}</span>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Category</span>
+                    <span class="fn-info-value">{{ provider.category.name|default:"Pending" }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Avg Rating</span>
-                    <span class="info-value">★ {{ provider.avg_rating }} / 5</span>
+                <div class="fn-info-row">
+                    <span class="fn-info-label">Avg Rating</span>
+                    <span class="fn-info-value">★ {{ provider.avg_rating }} / 5</span>
                 </div>
-                <div class="info-row" style="padding-top:16px;">
-                    <span class="info-label">Status</span>
-                    <span class="badge badge-{{ provider.status }}">
+                <div class="fn-info-row" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="fn-info-label">Status</span>
+                    <span class="fn-badge fn-badge-{{ provider.status }}">
                         {% if provider.status == 'approved' %}Approved
                         {% elif provider.status == 'pending' %}Pending
                         {% elif provider.status == 'suspended' %}Suspended
@@ -140,6 +101,5 @@
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}

@@ -5,46 +5,24 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>{% block title %}Provider Dashboard | FixNow{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/fixnow.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    
     <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-        :root { 
-            --navy:#050d1f; 
-            --blue:#2563eb; 
-            --blue2:#3b82f6; 
-            --violet:#7c3aed; 
-            --violet2:#a855f7; 
-            --glass-bg:rgba(255,255,255,0.04); 
-            --glass-border:rgba(255,255,255,0.09); 
-            --input-bg:rgba(255,255,255,0.06); 
-            --input-border:rgba(255,255,255,0.13);
+        :root {
             --sidebar-width: 260px;
         }
-        body { 
-            font-family:'Inter',sans-serif; 
-            background:var(--navy); 
-            color:#fff; 
-            min-height:100vh; 
-            position:relative; 
-            overflow-x:hidden;
-            display:flex;
+
+        body {
+            background: var(--fn-bg);
+            display: flex;
         }
-        .bg-orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:-1; }
-        .orb-1 { width:500px; height:500px; background:radial-gradient(circle,rgba(37,99,235,0.15) 0%,transparent 70%); top:-15%; left:-10%; }
-        .orb-2 { width:400px; height:400px; background:radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 70%); bottom:-10%; right:-10%; }
-        body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; z-index:-1; }
-        
-        /* Sidebar */
-        .sidebar {
+
+        /* Sidebar Styles */
+        .fn-sidebar {
             width: var(--sidebar-width);
             height: 100vh;
-            background: rgba(5,13,31,0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid var(--glass-border);
+            background: var(--fn-bg-card);
+            border-right: 1px solid var(--fn-border);
             position: fixed;
             top: 0;
             left: 0;
@@ -52,228 +30,215 @@
             display: flex;
             flex-direction: column;
         }
-        .sidebar-logo {
+
+        .fn-sidebar-logo {
             height: 80px;
             display: flex;
             align-items: center;
             padding: 0 32px;
-            border-bottom: 1px solid var(--glass-border);
-            font-family: 'Outfit', sans-serif;
+            border-bottom: 1px solid var(--fn-border);
+            font-family: var(--fn-font-head);
             font-size: 24px;
             font-weight: 800;
             text-decoration: none;
-            color: #fff;
+            color: var(--fn-text-1);
         }
-        .sidebar-logo span {
-            background: linear-gradient(135deg, var(--blue2), var(--violet2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .sidebar-nav {
+
+        .fn-sidebar-nav {
             flex: 1;
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-        .nav-item {
+
+        .fn-sidebar-link {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
             border-radius: 10px;
-            color: rgba(255,255,255,0.6);
+            color: var(--fn-text-2);
             text-decoration: none;
             font-size: 14px;
             font-weight: 600;
             transition: all 0.2s;
         }
-        .nav-item:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.05);
+
+        .fn-sidebar-link:hover {
+            background: var(--fn-bg);
+            color: var(--fn-text-1);
         }
-        .nav-item.active {
-            color: #fff;
-            background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(124,58,237,0.2));
-            border: 1px solid rgba(37,99,235,0.3);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+
+        .fn-sidebar-link.active {
+            background: var(--fn-accent);
+            color: var(--fn-text-1);
+            font-weight: 700;
         }
-        .sidebar-footer {
+
+        .fn-sidebar-footer {
             padding: 20px;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid var(--fn-border);
         }
-        .user-profile {
+
+        .fn-user-profile {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px;
             border-radius: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--fn-bg);
+            border: 1px solid var(--fn-border);
         }
-        .user-avatar {
+
+        .fn-user-avatar {
             width: 36px;
             height: 36px;
             border-radius: 10px;
-            background: linear-gradient(135deg, var(--blue), var(--violet));
+            background: var(--fn-text-1);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Outfit', sans-serif;
+            font-family: var(--fn-font-head);
             font-size: 16px;
             font-weight: 700;
         }
-        .user-info {
+
+        .fn-user-info {
             flex: 1;
             overflow: hidden;
         }
-        .user-name {
+
+        .fn-user-name {
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--fn-text-1);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .user-role {
+
+        .fn-user-role {
             font-size: 11px;
-            color: var(--blue2);
+            color: var(--fn-text-3);
+            font-weight: 600;
         }
-        
-        /* Main Content */
-        .main-wrapper {
+
+        /* Main Content Wrapper */
+        .fn-main-wrapper {
             flex: 1;
             margin-left: var(--sidebar-width);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: var(--fn-bg);
         }
-        .top-header {
+
+        .fn-top-header {
             height: 80px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding: 0 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            background: var(--fn-bg-card);
+            border-bottom: 1px solid var(--fn-border);
         }
-        .logout-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(239,68,68,0.1);
-            color: #fca5a5;
-            border: 1px solid rgba(239,68,68,0.2);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .logout-btn:hover {
-            background: rgba(239,68,68,0.2);
-            border-color: rgba(239,68,68,0.3);
-            color: #fff;
-        }
-        .content {
+
+        .fn-content {
             padding: 40px;
             flex: 1;
         }
-        
-        /* Common components for provider views */
-        .page-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 24px;
-            letter-spacing: -0.5px;
-        }
-        .glass-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-        }
 
-        /* Toastr customization for dark theme */
-        .toast { background-color: rgba(15,23,42,0.9) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; }
-        .toast-success { border-left: 4px solid #10b981 !important; }
-        .toast-error { border-left: 4px solid #ef4444 !important; }
-        .toast-warning { border-left: 4px solid #f59e0b !important; }
-        .toast-info { border-left: 4px solid #3b82f6 !important; }
+        @media (max-width: 900px) {
+            .fn-sidebar {
+                display: none; /* In a real app we'd add a hamburger menu */
+            }
+            .fn-main-wrapper {
+                margin-left: 0;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
 
-    <aside class="sidebar">
-        <a href="{% url 'provider_dashboard' %}" class="sidebar-logo">Fix<span>Now</span></a>
-        
-        <nav class="sidebar-nav">
-            <a href="{% url 'provider_dashboard' %}" class="nav-item {% block nav_dashboard %}{% endblock %}">
-                📊 Dashboard
-            </a>
-            <a href="{% url 'provider_booking_list' %}?status=pending" class="nav-item {% block nav_requests %}{% endblock %}">
-                🔔 New Requests
-            </a>
-            <a href="{% url 'provider_booking_list' %}?status=confirmed" class="nav-item {% block nav_confirmed %}{% endblock %}">
-                ✅ Confirmed Jobs
-            </a>
-            <a href="{% url 'provider_booking_list' %}?status=completed" class="nav-item {% block nav_history %}{% endblock %}">
-                📜 Job History
-            </a>
-            <a href="{% url 'provider_profile_edit' %}" class="nav-item {% block nav_profile %}{% endblock %}">
-                👤 My Profile
-            </a>
-        </nav>
-        
-        <div class="sidebar-footer">
-            <div class="user-profile">
-                <div class="user-avatar">{{ request.user.first_name|first|upper|default:"P" }}</div>
-                <div class="user-info">
-                    <div class="user-name">{{ request.user.get_full_name }}</div>
-                    <div class="user-role">Service Provider</div>
-                </div>
+<!-- Sidebar -->
+<aside class="fn-sidebar">
+    <a href="{% url 'provider_dashboard' %}" class="fn-sidebar-logo">FixNow</a>
+    
+    <nav class="fn-sidebar-nav">
+        <a href="{% url 'provider_dashboard' %}" class="fn-sidebar-link {% block nav_dashboard %}{% endblock %}">
+            Dashboard
+        </a>
+        <a href="{% url 'provider_booking_list' %}?status=pending" class="fn-sidebar-link {% block nav_requests %}{% endblock %}">
+            New Requests
+        </a>
+        <a href="{% url 'provider_booking_list' %}?status=confirmed" class="fn-sidebar-link {% block nav_confirmed %}{% endblock %}">
+            Confirmed Jobs
+        </a>
+        <a href="{% url 'provider_booking_list' %}?status=completed" class="fn-sidebar-link {% block nav_history %}{% endblock %}">
+            Job History
+        </a>
+        <a href="{% url 'provider_profile_edit' %}" class="fn-sidebar-link {% block nav_profile %}{% endblock %}">
+            My Profile
+        </a>
+    </nav>
+    
+    <div class="fn-sidebar-footer">
+        <div class="fn-user-profile">
+            <div class="fn-user-avatar">{{ request.user.first_name|first|upper|default:"P" }}</div>
+            <div class="fn-user-info">
+                <div class="fn-user-name">{{ request.user.get_full_name }}</div>
+                <div class="fn-user-role">Service Provider</div>
             </div>
         </div>
-    </aside>
+    </div>
+</aside>
 
-    <main class="main-wrapper">
-        <header class="top-header">
-            <a href="{% url 'user_logout' %}" class="logout-btn">Sign Out 🚪</a>
-        </header>
-        
-        <div class="content">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+<!-- Main Wrapper -->
+<div class="fn-main-wrapper">
+    <header class="fn-top-header">
+        <a href="{% url 'user_logout' %}" class="fn-btn fn-btn-ghost fn-btn-sm" style="color: var(--fn-red); border-color: var(--fn-red);">Sign Out</a>
+    </header>
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script>
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "timeOut": "4000"
-        };
-        {% if messages %}
-            {% for message in messages %}
-                {% if message.tags == 'success' %}
-                    toastr.success("{{ message }}");
-                {% elif message.tags == 'error' %}
-                    toastr.error("{{ message }}");
-                {% elif message.tags == 'warning' %}
-                    toastr.warning("{{ message }}");
-                {% else %}
-                    toastr.info("{{ message }}");
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    </script>
-    {% block extra_js %}{% endblock %}
+    <div class="fn-content">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer class="fn-footer" style="background: var(--fn-bg-card); border-top: 1px solid var(--fn-border);">
+        <span class="fn-footer__logo">FixNow</span>
+        <span class="fn-footer__copy">
+            © 2026 FixNow · Built by <a href="https://abhijithp.vercel.app/" target="_blank" rel="noopener">Abhijith P</a>
+        </span>
+    </footer>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "4000"
+    };
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                toastr.success("{{ message }}");
+            {% elif message.tags == 'error' %}
+                toastr.error("{{ message }}");
+            {% elif message.tags == 'warning' %}
+                toastr.warning("{{ message }}");
+            {% else %}
+                toastr.info("{{ message }}");
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</script>
+{% block extra_js %}{% endblock %}
+
 </body>
 </html>
