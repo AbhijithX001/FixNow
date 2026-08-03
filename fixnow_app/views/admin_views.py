@@ -278,9 +278,38 @@ def admin_booking_detail(request, id):
     )
     status_logs = booking.status_logs.select_related('changed_by').all()
 
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        note = request.POST.get('note', '').strip()
+        valid_statuses = dict(Booking.STATUS_CHOICES)
+
+        if new_status in valid_statuses:
+            booking.status = new_status
+            booking.save()
+
+            BookingStatusLog.objects.create(
+                booking=booking,
+                status=new_status,
+                changed_by=request.user,
+                note=note or f'Status updated to {new_status} by Admin.'
+            )
+
+            Notification.objects.create(
+                user=booking.customer,
+                message=f'Admin updated booking #{booking.id} status to {valid_statuses[new_status]}.'
+            )
+            Notification.objects.create(
+                user=booking.provider.user,
+                message=f'Admin updated booking #{booking.id} status to {valid_statuses[new_status]}.'
+            )
+
+            messages.success(request, f'Booking status updated to {valid_statuses[new_status]}.')
+            return redirect('admin_booking_detail', id=id)
+
     return render(request, 'admin_pages/booking_detail.html', {
         'booking': booking,
         'status_logs': status_logs,
+        'status_choices': Booking.STATUS_CHOICES,
     })
 
 

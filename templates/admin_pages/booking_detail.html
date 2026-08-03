@@ -100,6 +100,30 @@
         </div>
     </div>
 
+    <div class="fn-detail-card" style="grid-column: 1 / -1;">
+        <div class="fn-detail-card-header">
+            <span class="fn-detail-card-title">Admin Status Management</span>
+        </div>
+        <form method="POST" style="padding: 20px 22px;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Update Booking Status</label>
+                    <select name="status" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; color: #111827; background: #fff;">
+                        {% for code, name in status_choices %}
+                            <option value="{{ code }}" {% if booking.status == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 250px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Reason / Note (Optional)</label>
+                    <input type="text" name="note" placeholder="Reason for status change..." style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; color: #111827;">
+                </div>
+                <button type="submit" style="padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">Update Status</button>
+            </div>
+        </form>
+    </div>
+
 </div>
 
 <style>
