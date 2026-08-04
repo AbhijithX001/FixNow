@@ -44,12 +44,12 @@
                 {% csrf_token %}
                 <div class="fn-field">
                     <label class="fn-label">Email Address</label>
-                    <input type="email" name="email" class="fn-input" placeholder="you@example.com" required autofocus/>
+                    <input type="email" name="email" class="fn-input" placeholder="john.doe@example.com" required autofocus/>
                 </div>
                 <div class="fn-field">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <label class="fn-label">Password</label>
-                        {# <a href="{% url 'password_reset' %}" style="font-size: 13px; color: var(--fn-text-2); text-decoration: underline; text-underline-offset: 3px;">Forgot password?</a> #}
+                        <a href="{% url 'password_reset' %}" style="font-size: 13px; color: var(--fn-text-2); text-decoration: underline; text-underline-offset: 3px;">Forgot password?</a>
                     </div>
                     <input type="password" name="password" class="fn-input" placeholder="••••••••" required/>
                 </div>

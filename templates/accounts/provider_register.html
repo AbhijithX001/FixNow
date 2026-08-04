@@ -53,20 +53,20 @@
                 <div class="two-col">
                     <div class="fn-field">
                         <label class="fn-label">First Name</label>
-                        <input type="text" name="first_name" class="fn-input" placeholder="Rajan" required/>
+                        <input type="text" name="first_name" class="fn-input" placeholder="John" required/>
                     </div>
                     <div class="fn-field">
                         <label class="fn-label">Last Name</label>
-                        <input type="text" name="last_name" class="fn-input" placeholder="K" required/>
+                        <input type="text" name="last_name" class="fn-input" placeholder="Doe" required/>
                     </div>
                 </div>
                 <div class="fn-field">
                     <label class="fn-label">Email Address</label>
-                    <input type="email" name="email" class="fn-input" placeholder="you@example.com" required/>
+                    <input type="email" name="email" class="fn-input" placeholder="john.doe@example.com" required/>
                 </div>
                 <div class="fn-field">
                     <label class="fn-label">Phone Number</label>
-                    <input type="tel" name="phone" class="fn-input" placeholder="+91 9876543210" required/>
+                    <input type="tel" name="phone" class="fn-input" placeholder="+91 98765 43210" required/>
                 </div>
                 <div class="two-col">
                     <div class="fn-field">
@@ -95,7 +95,7 @@
                 <div class="custom-cat-box" id="custom_cat_box">
                     <div class="fn-field">
                         <label class="fn-label">Describe your service</label>
-                        <input type="text" name="custom_category" id="custom_category" class="fn-input" placeholder="e.g. Swimming Pool Cleaning"/>
+                        <input type="text" name="custom_category" id="custom_category" class="fn-input" placeholder="e.g., Solar Panel Installation"/>
                     </div>
                 </div>
 
@@ -113,7 +113,7 @@
 
                 <div class="fn-field">
                     <label class="fn-label">Bio</label>
-                    <textarea name="bio" class="fn-input" rows="3" placeholder="Tell customers about your experience..."></textarea>
+                    <textarea name="bio" class="fn-input" rows="3" placeholder="Briefly describe your expertise, certifications, and past experience..."></textarea>
                 </div>
 
                 <div class="fn-field">
@@ -153,7 +153,7 @@
         <div class="auth-footer">
             Already have an account? <a href="{% url 'user_login' %}">Sign in</a>
             &nbsp;&nbsp;·&nbsp;&nbsp;
-            {# Forgot password? <a href="{% url 'password_reset' %}">Reset</a> #}
+            Forgot password? <a href="{% url 'password_reset' %}">Reset</a>
             <br><br>
             Need services? <a href="{% url 'customer_register' %}">Register as Customer</a>
         </div>

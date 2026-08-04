@@ -37,20 +37,20 @@
                 <div class="two-col">
                     <div class="fn-field">
                         <label class="fn-label">First Name</label>
-                        <input type="text" name="first_name" class="fn-input" placeholder="Rajan" required/>
+                        <input type="text" name="first_name" class="fn-input" placeholder="John" required/>
                     </div>
                     <div class="fn-field">
                         <label class="fn-label">Last Name</label>
-                        <input type="text" name="last_name" class="fn-input" placeholder="K"/>
+                        <input type="text" name="last_name" class="fn-input" placeholder="Doe"/>
                     </div>
                 </div>
                 <div class="fn-field">
                     <label class="fn-label">Email Address</label>
-                    <input type="email" name="email" class="fn-input" placeholder="you@example.com" required/>
+                    <input type="email" name="email" class="fn-input" placeholder="john.doe@example.com" required/>
                 </div>
                 <div class="fn-field">
                     <label class="fn-label">Phone Number</label>
-                    <input type="tel" name="phone" class="fn-input" placeholder="+91 9876543210" required/>
+                    <input type="tel" name="phone" class="fn-input" placeholder="+91 98765 43210" required/>
                 </div>
                 <div class="two-col">
                     <div class="fn-field">
@@ -68,7 +68,7 @@
         <div class="auth-footer">
             Already have an account? <a href="{% url 'user_login' %}">Sign in</a>
             <br><br>
-            {# Forgot your password? <a href="{% url 'password_reset' %}">Reset it here</a> #}
+            Forgot your password? <a href="{% url 'password_reset' %}">Reset it here</a>
             <br><br>
             Want to offer services? <a href="{% url 'provider_register' %}">Register as Provider</a>
         </div>

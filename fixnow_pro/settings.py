@@ -135,15 +135,9 @@ AUTH_USER_MODEL = 'fixnow_app.CustomUser'
 # EMAIL_HOST_PASSWORD = ''
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# Email configuration (Brevo SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-EMAIL_HOST_USER = 'b45fbb001@smtp-brevo.com'
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+# Email configuration (Brevo HTTP API)
+EMAIL_BACKEND = 'fixnow_app.email_backends.BrevoHTTPBackend'
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
 
 DEFAULT_FROM_EMAIL = 'abhijithp946@gmail.com'
 
