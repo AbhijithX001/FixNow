@@ -51,7 +51,7 @@ def home(request):
         return redirect('provider_dashboard')
     
     from ..models import ServiceCategory
-    categories = ServiceCategory.objects.filter(is_active=True)
+    categories = ServiceCategory.objects.filter(is_active=True, providers__status='approved').distinct()
     return render(request, 'home.html', {'categories': categories})
 
 
