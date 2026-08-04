@@ -22,6 +22,8 @@ def _generate_otp():
 
 def _send_otp_email(email, otp):
     """Send the OTP verification email."""
+    from django.template.loader import render_to_string
+    
     subject = "FixNow Registration - Verification Code"
     message = (
         f"Your verification code is: {otp}\n\n"
@@ -29,12 +31,16 @@ def _send_otp_email(email, otp):
         "This code will expire in 10 minutes.\n\n"
         "If you did not request this, please ignore this email."
     )
+    
+    html_message = render_to_string('accounts/otp_email.html', {'otp': otp})
+    
     send_mail(
         subject,
         message,
         settings.DEFAULT_FROM_EMAIL,
         [email],
         fail_silently=False,
+        html_message=html_message,
     )
 
 def _clear_otp_session(request):
