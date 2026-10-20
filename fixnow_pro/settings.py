@@ -24,12 +24,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v$mlf7r2805z2xoey9%_5reukkhnpt)(m+%mxo!p()_$f2&x1f'
+# Set DJANGO_SECRET_KEY in every non-local environment.  The fallback keeps
+# a fresh checkout usable for local development without committing a real key.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-local-development-only-change-me',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').strip().lower() in {
+    '1', 'true', 'yes', 'on'
+}
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,[::1]'
+    ).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -42,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'fixnow_app',
+    'ai_assistant',
 ]
 
 MIDDLEWARE = [
@@ -139,9 +153,34 @@ AUTH_USER_MODEL = 'fixnow_app.CustomUser'
 EMAIL_BACKEND = 'fixnow_app.email_backends.BrevoHTTPBackend'
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
 
-DEFAULT_FROM_EMAIL = 'abhijithp946@gmail.com'
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'webmaster@localhost'
+)
 
 # Login/logout redirects
 LOGIN_URL = 'user_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'user_login'
+
+# ── Django cache (AI rate limiting) ───────────────────────────────────────────
+# DatabaseCache is shared by Django worker processes and suits the current
+# SQLite-backed project. Create the table once with:
+#   python manage.py createcachetable ai_rate_limit_cache
+# A production deployment should use a shared cache service such as Redis.
+CACHES = {
+    'default': {
+        'BACKEND': os.environ.get(
+            'DJANGO_CACHE_BACKEND',
+            'django.core.cache.backends.db.DatabaseCache',
+        ),
+        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'ai_rate_limit_cache'),
+        'TIMEOUT': 60,
+    },
+}
+
+# ── AI Assistant (Ollama) ─────────────────────────────────────────────────────
+# Override these via environment variables in production.
+OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:3b')
+# Maximum chat requests per user per minute (Django cache-backed limiter)
+AI_CHAT_MAX_REQUESTS_PER_MINUTE = int(os.environ.get('AI_CHAT_MAX_RPM', '10'))

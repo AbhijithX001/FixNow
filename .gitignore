@@ -11,6 +11,8 @@ ENV/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Logs
 *.log
@@ -27,6 +29,9 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local development data
+*.sqlite3
 
 # Local notes
 design.md
