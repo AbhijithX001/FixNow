@@ -243,13 +243,17 @@ def normalize_output(
     if not isinstance(raw_parsed, dict):
         det_pin = extract_pincode_deterministically(combined_message)
         det_category = prior_context.get("category_slug") or _category_hint_from_text(combined_message)
+        det_intent = prior_context.get("intent")
+        if det_intent not in {"service_request", "provider_search"}:
+            det_intent = "service_request" if det_category else "needs_clarification"
+        summary = message.strip() or "Unclear request"
         return {
-            "intent": prior_context.get("intent", "needs_clarification"),
+            "intent": det_intent,
             "category_slug": det_category,
-            "problem_summary": "Unparseable response; clarification needed",
+            "problem_summary": summary[:MAX_PROBLEM_SUMMARY_LEN],
             "pincode": det_pin,
             "missing_fields": compute_missing_fields(
-                prior_context.get("intent", "needs_clarification"),
+                det_intent,
                 det_category,
                 det_pin,
                 combined_message,

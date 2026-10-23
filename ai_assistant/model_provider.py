@@ -18,6 +18,27 @@ class ModelProviderError(Exception):
     pass
 
 
+def _parse_structured_content(content: Any) -> dict | None:
+    """Parse model JSON while tolerating common markdown wrappers."""
+    if not isinstance(content, str):
+        return None
+    text = content.strip()
+    candidates = [text]
+    if text.startswith("```") and text.endswith("```"):
+        candidates.append(text.split("\n", 1)[1].rsplit("```", 1)[0].strip())
+    start, end = text.find("{"), text.rfind("}")
+    if start >= 0 and end > start:
+        candidates.append(text[start:end + 1])
+    for candidate in candidates:
+        try:
+            parsed = json.loads(candidate)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+    return None
+
+
 def _messages(history, message):
     result = [{"role": item["role"], "content": item["content"]} for item in (history or []) if item.get("role") in {"user", "assistant"}]
     result.append({"role": "user", "content": message})
@@ -37,18 +58,12 @@ class ToolCallingClient:
             result = self.chat_with_tools(*args, **kwargs)
             if result.get("error"):
                 return {"content": "", "parsed": None, "elapsed": 0.0, "tok_s": 0.0, "error": result["error"]}
-            try:
-                result["parsed"] = json.loads(result.get("content", ""))
-            except (json.JSONDecodeError, TypeError):
-                result["parsed"] = None
+            result["parsed"] = _parse_structured_content(result.get("content", ""))
             return {**result, "elapsed": 0.0, "tok_s": 0.0}
         result = self.chat_with_tools(*args, **kwargs)
         if result.get("error"):
             return {"content": "", "parsed": None, "elapsed": 0.0, "tok_s": 0.0, "error": result["error"]}
-        try:
-            result["parsed"] = json.loads(result.get("content", ""))
-        except (json.JSONDecodeError, TypeError):
-            result["parsed"] = None
+        result["parsed"] = _parse_structured_content(result.get("content", ""))
         return {**result, "elapsed": 0.0, "tok_s": 0.0}
 
     def health_check(self):

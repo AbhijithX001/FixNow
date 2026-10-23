@@ -210,6 +210,13 @@ class NormalizeOutputTest(TestCase):
         self.assertTrue(result["normalization_applied"])
         self.assertTrue(result["post_schema_valid"])
 
+    def test_unparseable_response_retains_tap_as_plumbing_request(self):
+        result = normalize_output(None, "my kitchen tap is leaking")
+        self.assertEqual(result["intent"], "service_request")
+        self.assertEqual(result["category_slug"], "plumbing-services")
+        self.assertEqual(result["problem_summary"], "my kitchen tap is leaking")
+        self.assertIn("pincode", result["missing_fields"])
+
     def test_alias_category_normalised(self):
         raw = {
             "intent": "service_request",

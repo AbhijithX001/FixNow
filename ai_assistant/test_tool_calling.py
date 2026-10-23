@@ -54,3 +54,15 @@ class GeminiAdapterTests(TestCase):
         self.assertEqual(request.call_count, 2)
         sent = request.call_args_list[1].args[0]["contents"]
         self.assertIn("functionResponse", json.dumps(sent))
+
+    @patch("ai_assistant.model_provider.ToolCallingClient._gemini_request")
+    def test_markdown_wrapped_json_is_parsed_by_chat(self, request):
+        wrapped = (
+            "```json\n"
+            '{"intent":"service_request","category_slug":"plumbing-services",'
+            '"problem_summary":"Leaking tap","pincode":null,"missing_fields":[],'
+            '"needs_clarification":false}\n```'
+        )
+        request.return_value = {"candidates": [{"content": {"parts": [{"text": wrapped}]}}]}
+        result = ToolCallingClient("gemini", api_key="test-key").chat("my tap is leaking")
+        self.assertEqual(result["parsed"]["category_slug"], "plumbing-services")
