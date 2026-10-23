@@ -162,22 +162,6 @@ LOGIN_URL = 'user_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'user_login'
 
-# ── Django cache (AI rate limiting) ───────────────────────────────────────────
-# DatabaseCache is shared by Django worker processes and suits the current
-# SQLite-backed project. Create the table once with:
-#   python manage.py createcachetable ai_rate_limit_cache
-# A production deployment should use a shared cache service such as Redis.
-CACHES = {
-    'default': {
-        'BACKEND': os.environ.get(
-            'DJANGO_CACHE_BACKEND',
-            'django.core.cache.backends.db.DatabaseCache',
-        ),
-        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'ai_rate_limit_cache'),
-        'TIMEOUT': 60,
-    },
-}
-
 # AI provider selection is explicit; there is no automatic provider fallback.
 AI_PROVIDER = os.environ.get('AI_PROVIDER', 'ollama').strip().lower()
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
@@ -190,5 +174,3 @@ GEMINI_BASE_URL = os.environ.get(
 # Override these via environment variables in production.
 OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:3b')
-# Maximum chat requests per user per minute (Django cache-backed limiter)
-AI_CHAT_MAX_REQUESTS_PER_MINUTE = int(os.environ.get('AI_CHAT_MAX_RPM', '10'))

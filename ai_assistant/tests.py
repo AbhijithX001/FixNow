@@ -21,7 +21,6 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from . import views as ai_views
 from .ollama_client import MAX_OLLAMA_RESPONSE_BYTES, OllamaClient
 from .safety_guard import check_safety_hazard
 from .validator import (
@@ -678,32 +677,31 @@ class ChatViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @patch("ai_assistant.views._get_rate_limit", return_value=2)
-    def test_rate_limit_uses_shared_cache_lock_and_counter(self, _mock_limit):
-        class FakeCache:
-            def __init__(self):
-                self.values = {}
+    @patch("ai_assistant.views.get_client")
+    def test_chat_does_not_require_database_cache(self, mock_get_client):
+        mock_client = MagicMock()
+        mock_client.chat.return_value = {
+            "content": "",
+            "parsed": {
+                "intent": "needs_clarification",
+                "category_slug": None,
+                "problem_summary": "Unclear request",
+                "pincode": None,
+                "missing_fields": ["problem_details"],
+                "needs_clarification": True,
+            },
+            "elapsed": 0.1,
+            "tok_s": 1.0,
+            "error": None,
+        }
+        mock_get_client.return_value = mock_client
 
-            def add(self, key, value, timeout=None):
-                if key in self.values:
-                    return False
-                self.values[key] = value
-                return True
+        self.client.login(email=self.customer.email, password="testpassword123")
+        with patch("django.core.cache.cache.get", side_effect=RuntimeError("cache unavailable")):
+            response = self._post({"message": "help"})
 
-            def get(self, key, default=None):
-                return self.values.get(key, default)
-
-            def set(self, key, value, timeout=None):
-                self.values[key] = value
-
-            def delete(self, key):
-                self.values.pop(key, None)
-
-        fake_cache = FakeCache()
-        with patch.object(ai_views, "cache", fake_cache):
-            self.assertFalse(ai_views._is_rate_limited(self.customer.pk))
-            self.assertFalse(ai_views._is_rate_limited(self.customer.pk))
-            self.assertTrue(ai_views._is_rate_limited(self.customer.pk))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
 
 
 class ChatWidgetIntegrationTest(TestCase):

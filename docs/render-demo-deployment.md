@@ -32,10 +32,13 @@ GEMINI_API_KEY=<Gemini API key>
 GEMINI_MODEL=<supported Gemini model>
 GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
 
-DJANGO_CACHE_BACKEND=django.core.cache.backends.db.DatabaseCache
-DJANGO_CACHE_LOCATION=ai_rate_limit_cache
-AI_CHAT_MAX_RPM=10
 ```
+
+The AI chat endpoint no longer depends on Django's database-backed cache, so
+the legacy `ai_rate_limit_cache` migration is not required for requests. The
+historical migration remains unchanged for compatibility with databases where
+it was already applied; do not remove or reverse that table as part of this
+change.
 
 ## Initialization
 

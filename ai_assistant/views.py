@@ -14,22 +14,16 @@ Both endpoints require an authenticated session (``@login_required``).
 The chat endpoint additionally enforces the ``customer`` user type so that
 providers and admin users cannot invoke the assistant.
 
-Rate limiting
--------------
-A fixed-window counter is stored in Django's configured cache. The default
-DatabaseCache backend is shared by the current Django worker processes. The
-counter update is protected by a short cache lock because Django's
-DatabaseCache ``incr()`` implementation is not atomic.
+Cache dependency
+----------------
+The customer chat path does not depend on Django's database-backed cache.
 """
 
 import json
 import logging
 import re
-import time
 from typing import Any, Dict
-from uuid import uuid4
 
-from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
@@ -69,62 +63,6 @@ CANCEL_FLOW_RE = re.compile(
     r"\b(?:cancel|abandon|forget|restart|start\s+over|never\s*mind)\b|\bdo\s+not\s+book\b|\bdon't\s+book\b",
     re.IGNORECASE,
 )
-
-# ─── Django-cache-backed rate limiter ─────────────────────────────────────────
-
-_WINDOW_SECONDS = 60
-_LOCK_SECONDS = 5
-_LOCK_WAIT_SECONDS = 0.5
-
-
-class RateLimitBackendUnavailable(Exception):
-    """Raised when the configured shared cache cannot enforce a limit."""
-
-
-def _get_rate_limit() -> int:
-    """Read AI_CHAT_MAX_REQUESTS_PER_MINUTE from settings (default 10)."""
-    try:
-        from django.conf import settings  # noqa: PLC0415
-
-        return int(getattr(settings, "AI_CHAT_MAX_REQUESTS_PER_MINUTE", 10))
-    except Exception:  # noqa: BLE001
-        return 10
-
-
-def _is_rate_limited(user_id: int) -> bool:
-    """Return True if the user has exceeded the shared-cache minute limit.
-
-    ``cache.add`` is used as an atomic lock acquisition operation. The
-    configured default is DatabaseCache so the limiter is shared by Django
-    worker processes. A LocMemCache override is only process-local and should
-    not be used for production enforcement.
-    """
-    limit = _get_rate_limit()
-    counter_key = f"ai_assistant:rate:{user_id}"
-    lock_key = f"{counter_key}:lock"
-    lock_token = uuid4().hex
-    deadline = time.monotonic() + _LOCK_WAIT_SECONDS
-
-    acquired = False
-    try:
-        while not cache.add(lock_key, lock_token, timeout=_LOCK_SECONDS):
-            if time.monotonic() >= deadline:
-                # Fail closed if the shared limiter is contended.
-                return True
-            time.sleep(0.01)
-        acquired = True
-        count = cache.get(counter_key, 0) + 1
-        cache.set(counter_key, count, timeout=_WINDOW_SECONDS)
-        return count > limit
-    except Exception as exc:  # noqa: BLE001
-        logger.error("AI rate-limit cache unavailable: %s", type(exc).__name__)
-        raise RateLimitBackendUnavailable from exc
-    finally:
-        # A crashed worker leaves the short lock to expire rather than
-        # blocking future requests forever.
-        if acquired and cache.get(lock_key) == lock_token:
-            cache.delete(lock_key)
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -357,7 +295,7 @@ def chat(request) -> JsonResponse:
           "emergency_contacts": ["112", "101 (Fire)"]
         }
 
-    Error responses: 400 (bad request), 429 (rate limited), 503 (Ollama down).
+    Error responses: 400 (bad request), 503 (configured AI provider down).
     """
     # ── User type guard ────────────────────────────────────────────────────
     # Only explicit 'customer' accounts may use the assistant.
@@ -368,20 +306,6 @@ def chat(request) -> JsonResponse:
     if user_type != "customer":
         return _json_error(
             "The AI assistant is available to customers only.", status=403
-        )
-
-    # ── Rate limit ─────────────────────────────────────────────────────────
-    try:
-        rate_limited = _is_rate_limited(user.pk)
-    except RateLimitBackendUnavailable:
-        return _json_error(
-            "The AI assistant is temporarily unavailable. Please try again later.",
-            status=503,
-        )
-    if rate_limited:
-        return _json_error(
-            "Too many requests. Please wait a moment before trying again.",
-            status=429,
         )
 
     # ── Parse body ─────────────────────────────────────────────────────────

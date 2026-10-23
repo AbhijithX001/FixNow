@@ -212,9 +212,8 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         )
         self.tirur_provider.service_pincodes.add(self.tirur)
 
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
     @patch("ai_assistant.views.get_client")
-    def test_provider_search_response_contains_only_database_result(self, mock_client, _rate_limit):
+    def test_provider_search_response_contains_only_database_result(self, mock_client):
         mock_client.return_value.chat.return_value = {
             "content": "",
             "parsed": {
@@ -246,9 +245,8 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         )
         self.assertIn("Maya Plumber", data["assistant_message"])
 
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
     @patch("ai_assistant.views.get_client")
-    def test_electrical_provider_search_resolves_tirur_area(self, mock_client, _rate_limit):
+    def test_electrical_provider_search_resolves_tirur_area(self, mock_client):
         mock_client.return_value.chat.return_value = {
             "content": "",
             "parsed": {
@@ -280,9 +278,8 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
             "Tirur Electrician",
         )
 
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
     @patch("ai_assistant.views.get_client")
-    def test_leaking_tap_then_pin_follow_up_keeps_service_context(self, mock_client, _rate_limit):
+    def test_leaking_tap_then_pin_follow_up_keeps_service_context(self, mock_client):
         mock_client.return_value.chat.side_effect = [
             {
                 "content": "",
@@ -351,9 +348,8 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         self.assertEqual(data["provider_discovery"]["status"], "ok")
         self.assertNotIn("no specific service", data["assistant_message"].lower())
 
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
     @patch("ai_assistant.views.get_client")
-    def test_follow_up_pin_without_plumbing_coverage_is_honest(self, mock_client, _rate_limit):
+    def test_follow_up_pin_without_plumbing_coverage_is_honest(self, mock_client):
         pin = ServicePincode.objects.create(
             pincode="678541", area_name="Puthiyankam", district="Palakkad"
         )
@@ -410,8 +406,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         self.assertIn("Electrical Services", data["assistant_message"])
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_yes_executes_one_pending_provider_search_and_consumes_it(self, _rate_limit, mock_client):
+    def test_yes_executes_one_pending_provider_search_and_consumes_it(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [{
             "role": "assistant",
@@ -444,8 +439,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         mock_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_repeated_yes_has_no_consumed_action_to_execute(self, _rate_limit, mock_client):
+    def test_repeated_yes_has_no_consumed_action_to_execute(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [{
             "role": "assistant",
@@ -472,8 +466,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         mock_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_stale_pending_action_is_not_revived(self, _rate_limit, mock_client):
+    def test_stale_pending_action_is_not_revived(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [
             {
@@ -504,9 +497,8 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         self.assertEqual(data["assistant_message"], "What would you like me to confirm?")
         mock_client.assert_not_called()
 
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
     @patch("ai_assistant.views.get_client")
-    def test_category_change_replaces_previous_provider_search(self, mock_client, _rate_limit):
+    def test_category_change_replaces_previous_provider_search(self, mock_client):
         mock_client.return_value.chat.return_value = {
             "content": "",
             "parsed": {
@@ -554,8 +546,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         self.assertEqual(data["pending_action"]["category_slug"], "plumbing-services")
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_explicit_booking_request_hands_off_to_existing_booking_form(self, _rate_limit, mock_client):
+    def test_explicit_booking_request_hands_off_to_existing_booking_form(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [{
             "role": "assistant",
@@ -594,8 +585,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         mock_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_named_provider_booking_request_selects_only_discovered_provider(self, _rate_limit, mock_client):
+    def test_named_provider_booking_request_selects_only_discovered_provider(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [{
             "role": "assistant",
@@ -630,8 +620,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         mock_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_booking_request_without_provider_selection_does_not_create_booking(self, _rate_limit, mock_client):
+    def test_booking_request_without_provider_selection_does_not_create_booking(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
 
         response = self.client.post(
@@ -649,8 +638,7 @@ class ProviderDiscoveryChatIntegrationTest(TestCase):
         mock_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
-    @patch("ai_assistant.views._is_rate_limited", return_value=False)
-    def test_cancellation_clears_pending_provider_action(self, _rate_limit, mock_client):
+    def test_cancellation_clears_pending_provider_action(self, mock_client):
         self.client.login(email=self.user.email, password="test-password-123")
         history = [{
             "role": "assistant",
