@@ -88,6 +88,25 @@
         scrollToLatest();
     }
 
+    function appendBookingLink(url) {
+        if (typeof url !== 'string' || !url.startsWith('/')) return;
+        let parsed;
+        try {
+            parsed = new URL(url, window.location.origin);
+        } catch (error) {
+            return;
+        }
+        if (parsed.origin !== window.location.origin || !/^\/book\/\d+\/?$/.test(parsed.pathname)) return;
+
+        const action = document.createElement('a');
+        action.className = 'fixnow-ai-booking-link';
+        action.href = `${parsed.pathname}${parsed.search}`;
+        action.textContent = 'Continue to booking';
+        action.setAttribute('aria-label', 'Continue to the FixNow booking form');
+        messages.appendChild(action);
+        scrollToLatest();
+    }
+
     function readableField(field) {
         return String(field)
             .replaceAll('_', ' ')
@@ -173,6 +192,7 @@
             const payload = await readResponse(response);
             loadingMessage.remove();
             appendMessage('assistant', responseText(payload));
+            appendBookingLink(payload.booking_url);
             conversationHistory.push({ role: 'user', content: message });
             conversationHistory.push({
                 role: 'assistant',
@@ -182,6 +202,7 @@
                     category_slug: payload.category_slug,
                     pincode: payload.pincode,
                     problem_summary: payload.problem_summary,
+                    pending_action: payload.pending_action,
                 },
             });
         } catch (error) {

@@ -24,6 +24,7 @@ DatabaseCache ``incr()`` implementation is not atomic.
 
 import json
 import logging
+import re
 import time
 from typing import Any, Dict
 from uuid import uuid4
@@ -31,12 +32,19 @@ from uuid import uuid4
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
-from .ollama_client import get_client
+from fixnow_app.models import ServiceCategory
+
+from .model_provider import get_configured_client as get_client
 from .provider_discovery import (
+    build_pending_action,
     build_discovery_message,
     find_providers,
+    get_eligible_provider,
+    resolve_location_from_text,
+    select_provider_from_message,
     list_available_categories,
     list_covered_pincodes,
 )
@@ -49,6 +57,18 @@ from .validator import (
 )
 
 logger = logging.getLogger(__name__)
+AFFIRMATIVE_MESSAGE_RE = re.compile(
+    r"^(?:yes|yeah|yep|sure|okay|ok|go ahead|please do|show them)[.! ]*$",
+    re.IGNORECASE,
+)
+BOOKING_REQUEST_RE = re.compile(
+    r"\b(?:book|booking|schedule|hire|reserve)\b|\bcan\s+you\s+(?:book|schedule|hire)\b",
+    re.IGNORECASE,
+)
+CANCEL_FLOW_RE = re.compile(
+    r"\b(?:cancel|abandon|forget|restart|start\s+over|never\s*mind)\b|\bdo\s+not\s+book\b|\bdon't\s+book\b",
+    re.IGNORECASE,
+)
 
 # ─── Django-cache-backed rate limiter ─────────────────────────────────────────
 
@@ -162,14 +182,86 @@ def _get_message_from_request(request) -> tuple[str, list[dict[str, Any]], str |
                     safe_context[key] = value
                 elif key == "category_slug" and value in ALIAS_TO_CANONICAL:
                     safe_context[key] = ALIAS_TO_CANONICAL[value]
+                elif key == "category_slug" and isinstance(value, str) and ServiceCategory.objects.filter(
+                    slug=value, is_active=True
+                ).exists():
+                    safe_context[key] = value
                 elif key == "pincode" and isinstance(value, str) and len(value) == 6 and value.isdigit():
                     safe_context[key] = value
                 elif key == "problem_summary" and isinstance(value, str):
                     safe_context[key] = value[:MAX_HISTORY_MESSAGE_LEN]
+                elif key == "pending_action" and value is None:
+                    safe_context[key] = None
+            pending = context.get("pending_action")
+            if "pending_action" in context and pending is None:
+                safe_context["pending_action"] = None
+            if isinstance(pending, dict) and pending.get("action") == "provider_search":
+                category = pending.get("category_slug")
+                pin = pending.get("pincode")
+                area = pending.get("area_name", "")
+                if (
+                    (
+                        category in ALIAS_TO_CANONICAL
+                        or (
+                            isinstance(category, str)
+                            and ServiceCategory.objects.filter(
+                                slug=category, is_active=True
+                            ).exists()
+                        )
+                    )
+                    and isinstance(pin, str) and len(pin) == 6 and pin.isdigit()
+                    and isinstance(area, str) and len(area) <= MAX_HISTORY_MESSAGE_LEN
+                ):
+                    safe_context["pending_action"] = {
+                        "action": "provider_search",
+                        "category_slug": (
+                            category
+                            if ServiceCategory.objects.filter(
+                                slug=category, is_active=True
+                            ).exists()
+                            else ALIAS_TO_CANONICAL[category]
+                        ),
+                        "pincode": pin,
+                        "area_name": area,
+                    }
             entry["context"] = safe_context
         history.append(entry)
 
     return message, history, None
+
+
+def _last_pending_action(history: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Return only the latest assistant turn's pending action.
+
+    Requiring the latest assistant context prevents an old action from being
+    revived when a client omits or reorders newer conversation turns.
+    """
+    for item in reversed(history):
+        if item.get("role") != "assistant":
+            continue
+        context = item.get("context") or {}
+        return context.get("pending_action") if "pending_action" in context else None
+    return None
+
+
+def _is_affirmative(message: str) -> bool:
+    return bool(AFFIRMATIVE_MESSAGE_RE.fullmatch(message.strip()))
+
+
+def _is_booking_request(message: str) -> bool:
+    return bool(BOOKING_REQUEST_RE.search(message or ""))
+
+
+def _is_flow_cancellation(message: str) -> bool:
+    return bool(CANCEL_FLOW_RE.search(message or ""))
+
+
+def _history_text(history: list[dict[str, Any]]) -> str:
+    return " ".join(
+        item.get("content", "")
+        for item in history
+        if isinstance(item.get("content"), str)
+    )
 
 
 # ─── Views ────────────────────────────────────────────────────────────────────
@@ -199,6 +291,13 @@ def health(request) -> JsonResponse:
           "error": "..."
         }
     """
+    # The health endpoint is consumed by the customer-facing widget and is
+    # therefore restricted to the same explicit customer role as chat.
+    if getattr(request.user, "user_type", None) != "customer":
+        return _json_error(
+            "The AI assistant is available to customers only.", status=403
+        )
+
     client = get_client()
     result = client.health_check()
 
@@ -315,47 +414,184 @@ def chat(request) -> JsonResponse:
             }
         )
 
-    # ── 2. LLM inference ───────────────────────────────────────────────────
-    client = get_client()
-    llm_result = client.chat(
-        user_message=message,
-        conversation_history=conversation_history,
-    )
-
-    if llm_result["error"]:
-        logger.error("Ollama error for user=%s: %s", user.pk, llm_result["error"])
-        # Do NOT forward llm_result["error"] to the client — it may contain
-        # internal hostnames, SSL certificate details, or file-system paths.
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": (
-                    "The AI assistant is temporarily unavailable. "
-                    "Please try again in a moment."
-                ),
-            },
-            status=503,
-        )
-
-    # ── 3. Validate & normalise ────────────────────────────────────────────
-    normalized = normalize_output(
-        llm_result["parsed"], message, conversation_history
-    )
-
-    # Provider facts always come from the database.  The model may suggest
-    # an intent/category/PIN, but it cannot create or modify lookup results.
+    # ── 2. Handle one-shot read-only confirmations ────────────────────────
+    pending_action = _last_pending_action(conversation_history)
     provider_discovery = None
     assistant_message = None
-    if normalized.get("intent") in {"provider_search", "service_request"} and normalized.get("category_slug") and normalized.get("pincode"):
-        category_slug = normalized.get("category_slug")
-        pincode = normalized.get("pincode")
-        if pincode:
-            provider_discovery = find_providers(pincode, category_slug)
-        elif category_slug:
-            provider_discovery = list_covered_pincodes(category_slug)
+    next_pending_action = None
+    booking_url = None
+
+    if _is_flow_cancellation(message):
+        normalized = {
+            "intent": "needs_clarification",
+            "category_slug": None,
+            "problem_summary": "Conversation flow cancelled",
+            "pincode": None,
+            "missing_fields": [],
+            "needs_clarification": False,
+            "normalization_applied": True,
+            "normalization_notes": ["Cleared the pending conversational action"],
+            "post_schema_valid": True,
+        }
+        assistant_message = "Okay, I cancelled that pending action. What would you like to do next?"
+        llm_result = {"elapsed": 0.0, "tok_s": 0.0}
+    elif _is_booking_request(message):
+        # Booking is a consequential action.  The assistant only creates a
+        # server-validated handoff to FixNow's existing booking form; it never
+        # creates a Booking directly from model output or browser state.
+        normalized = {
+            "intent": "booking_help",
+            "category_slug": None,
+            "problem_summary": "Booking request",
+            "pincode": None,
+            "missing_fields": ["provider", "booking_details"],
+            "needs_clarification": True,
+            "normalization_applied": True,
+            "normalization_notes": ["Handled explicit booking request deterministically"],
+            "post_schema_valid": True,
+        }
+        if pending_action:
+            provider_discovery = find_providers(
+                pending_action["pincode"], pending_action["category_slug"]
+            )
+            if provider_discovery.get("status") == "ok":
+                selection = select_provider_from_message(message, provider_discovery)
+                selected = selection.get("provider")
+                if selected:
+                    category = provider_discovery.get("category") or {}
+                    provider = get_eligible_provider(
+                        selected.get("provider_id"),
+                        provider_discovery.get("pincode"),
+                        category.get("slug"),
+                    )
+                    if provider:
+                        normalized.update({
+                            "category_slug": provider["category"]["slug"],
+                            "pincode": provider_discovery.get("pincode"),
+                            "missing_fields": ["preferred_date", "preferred_time", "address", "description"],
+                            "needs_clarification": True,
+                        })
+                        booking_url = reverse(
+                            "book_provider", args=[provider["provider_id"]]
+                        )
+                        assistant_message = (
+                            f"I can help you book {provider['display_name']}. "
+                            "Please complete the booking details in the FixNow form."
+                        )
+                    else:
+                        assistant_message = (
+                            "That provider is no longer eligible for this service area. "
+                            "Please run a fresh provider search."
+                        )
+                elif selection.get("status") == "provider_ambiguous":
+                    names = ", ".join(
+                        item["display_name"] for item in selection.get("matches", [])
+                    )
+                    assistant_message = f"Which provider would you like to book: {names}?"
+                    normalized["missing_fields"] = ["provider"]
+                else:
+                    assistant_message = (
+                        "Which provider from the results would you like to book? "
+                        "Please include the provider's name."
+                    )
+                    normalized["missing_fields"] = ["provider"]
+            else:
+                assistant_message = (
+                    "I could not confirm an eligible provider from the previous results. "
+                    "Please search again before starting a booking."
+                )
         else:
-            provider_discovery = list_available_categories()
-        assistant_message = build_discovery_message(provider_discovery)
+            assistant_message = (
+                "I can help start a booking, but I first need a provider selected "
+                "from a current FixNow search."
+            )
+        llm_result = {"elapsed": 0.0, "tok_s": 0.0}
+    elif _is_affirmative(message):
+        if pending_action:
+            normalized = {
+                "intent": "provider_search",
+                "category_slug": pending_action["category_slug"],
+                "problem_summary": "Provider search confirmed",
+                "pincode": pending_action["pincode"],
+                "missing_fields": [],
+                "needs_clarification": False,
+                "normalization_applied": True,
+                "normalization_notes": ["Executed one pending provider search"],
+                "post_schema_valid": True,
+            }
+            provider_discovery = find_providers(
+                pending_action["pincode"], pending_action["category_slug"]
+            )
+            assistant_message = build_discovery_message(provider_discovery)
+        else:
+            normalized = {
+                "intent": "needs_clarification",
+                "category_slug": None,
+                "problem_summary": "No pending provider search",
+                "pincode": None,
+                "missing_fields": ["request_details"],
+                "needs_clarification": True,
+                "normalization_applied": True,
+                "normalization_notes": ["No pending action to confirm"],
+                "post_schema_valid": True,
+            }
+            assistant_message = "What would you like me to confirm?"
+        llm_result = {"elapsed": 0.0, "tok_s": 0.0}
+    else:
+        # ── 3. LLM inference ──────────────────────────────────────────────
+        client = get_client()
+        llm_result = client.chat(
+            user_message=message,
+            conversation_history=conversation_history,
+        )
+
+        if llm_result["error"]:
+            logger.error("Ollama error for user=%s: %s", user.pk, llm_result["error"])
+            # Do NOT forward llm_result["error"] to the client — it may contain
+            # internal hostnames, SSL certificate details, or file-system paths.
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": (
+                        "The AI assistant is temporarily unavailable. "
+                        "Please try again in a moment."
+                    ),
+                },
+                status=503,
+            )
+
+        # ── 4. Validate & normalise ───────────────────────────────────────
+        normalized = normalize_output(
+            llm_result["parsed"], message, conversation_history
+        )
+
+        # Provider facts always come from the database.  The model may suggest
+        # an intent/category/PIN, but it cannot create or modify lookup results.
+        combined_text = f"{_history_text(conversation_history)} {message}".strip()
+        location = resolve_location_from_text(combined_text)
+        category_slug = normalized.get("category_slug")
+        if (
+            normalized.get("intent") in {"provider_search", "service_request"}
+            and (category_slug or normalized.get("intent") == "provider_search")
+        ):
+            if normalized.get("pincode"):
+                provider_discovery = find_providers(normalized["pincode"], category_slug)
+            elif location["status"] == "resolved":
+                normalized["pincode"] = location["pincode"]
+                provider_discovery = find_providers(location["pincode"], category_slug)
+            elif location["status"] in {"unknown_location", "location_ambiguous"}:
+                provider_discovery = {
+                    "status": location["status"],
+                    "location": location.get("location", ""),
+                    "matches": location.get("matches", []),
+                    "providers": [],
+                }
+            elif normalized.get("intent") == "provider_search":
+                provider_discovery = list_available_categories()
+
+            if provider_discovery is not None:
+                assistant_message = build_discovery_message(provider_discovery)
+                next_pending_action = build_pending_action(provider_discovery)
 
     logger.info(
         "AI chat response for user=%s: intent=%s, tok_s=%.1f, elapsed=%.2fs",
@@ -382,6 +618,8 @@ def chat(request) -> JsonResponse:
             "post_schema_valid": normalized.get("post_schema_valid", False),
             "provider_discovery": provider_discovery,
             "assistant_message": assistant_message,
+            "pending_action": next_pending_action,
+            "booking_url": booking_url,
             # ── Performance metadata ───────────────────────────────────
             "elapsed_s": llm_result.get("elapsed", 0),
             "tok_s": llm_result.get("tok_s", 0),

@@ -72,6 +72,13 @@
             <div class="form-card-title">Booking Details</div>
             <form method="POST">
                 {% csrf_token %}
+                {% if form.errors %}
+                <div role="alert" style="margin-bottom:16px; color:#b91c1c; font-size:13px;">
+                    Please correct the highlighted booking details before submitting.
+                    {{ form.non_field_errors }}
+                    {% for field in form %}{{ field.errors }}{% endfor %}
+                </div>
+                {% endif %}
                 <div class="two-col">
                     <div class="fn-field">
                         <label class="fn-label">Preferred Date</label>

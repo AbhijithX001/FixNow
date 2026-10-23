@@ -411,7 +411,7 @@ class OllamaClientChatTest(TestCase):
 
 
 class HealthViewTest(TestCase):
-    """GET /ai/health/ — requires login."""
+    """GET /ai/health/ — customer-only authenticated endpoint."""
 
     def setUp(self):
         self.client = Client()
@@ -420,11 +420,38 @@ class HealthViewTest(TestCase):
             password="testpassword123",
             user_type="customer",
         )
+        self.provider = User.objects.create_user(
+            email="provider@test.com",
+            password="testpassword123",
+            user_type="provider",
+        )
+        self.admin = User.objects.create_user(
+            email="admin@test.com",
+            password="testpassword123",
+            is_staff=True,
+            is_superuser=True,
+        )
         self.url = reverse("ai_assistant:health")
 
     def test_redirects_if_not_logged_in(self):
         response = self.client.get(self.url)
         self.assertIn(response.status_code, (302, 301))
+
+    def test_provider_gets_403_without_checking_ollama(self):
+        self.client.login(email="provider@test.com", password="testpassword123")
+        with patch("ai_assistant.views.get_client") as mock_get_client:
+            response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        mock_get_client.assert_not_called()
+
+    def test_admin_gets_403_without_checking_ollama(self):
+        self.client.login(email="admin@test.com", password="testpassword123")
+        with patch("ai_assistant.views.get_client") as mock_get_client:
+            response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        mock_get_client.assert_not_called()
 
     @patch("ai_assistant.views.get_client")
     def test_returns_200_when_ollama_ok(self, mock_get_client):

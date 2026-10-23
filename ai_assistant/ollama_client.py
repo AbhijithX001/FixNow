@@ -95,6 +95,31 @@ class OllamaClient:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
+    def _request_payload(self, user_message, conversation_history=None, tools=None):
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        for item in (conversation_history or []):
+            if item.get("role") in {"user", "assistant"} and isinstance(item.get("content"), str):
+                messages.append({"role": item["role"], "content": item["content"]})
+        messages.append({"role": "user", "content": user_message})
+        payload = {"model": self.model, "messages": messages, "stream": False, "options": {"temperature": 0.0, "seed": 42}}
+        if tools:
+            payload["tools"] = [{"type": "function", **tool} for tool in tools]
+        else:
+            payload["format"] = "json"
+        return payload
+
+    def _post_json(self, payload):
+        request = urllib.request.Request(
+            self._chat_url, data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"}, method="POST"
+        )
+        with urllib.request.urlopen(request, timeout=self.timeout) as resp:
+            raw = self._read_response(resp).decode("utf-8")
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            raise ValueError("Ollama returned an invalid response envelope.")
+        return data
+
     def health_check(self) -> Dict[str, Any]:
         """
         Verify that Ollama is reachable and the configured model is available.

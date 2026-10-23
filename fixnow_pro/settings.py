@@ -178,6 +178,14 @@ CACHES = {
     },
 }
 
+# AI provider selection is explicit; there is no automatic provider fallback.
+AI_PROVIDER = os.environ.get('AI_PROVIDER', 'ollama').strip().lower()
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash-lite')
+GEMINI_BASE_URL = os.environ.get(
+    'GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'
+)
+
 # ── AI Assistant (Ollama) ─────────────────────────────────────────────────────
 # Override these via environment variables in production.
 OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')

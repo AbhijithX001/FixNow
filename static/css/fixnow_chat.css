@@ -237,6 +237,20 @@
     cursor: pointer;
 }
 
+.fixnow-ai-booking-link {
+    align-self: flex-start;
+    padding: 10px 13px;
+    border: 1px solid var(--fn-text-1);
+    border-radius: 10px;
+    background: var(--fn-accent);
+    color: var(--fn-text-1);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.fixnow-ai-booking-link:hover { background: var(--fn-accent-dark); }
+
 .fixnow-ai-status-message {
     min-height: 0;
     padding: 0 18px;
