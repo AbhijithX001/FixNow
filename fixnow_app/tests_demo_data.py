@@ -1,7 +1,8 @@
 from io import StringIO
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from .models import CustomUser, ProviderProfile, ServiceCategory, ServicePincode
 from ai_assistant.provider_discovery import find_providers
@@ -48,3 +49,9 @@ class DemoDataCommandTests(TestCase):
         call_command("seed_demo_data", "--dry-run", stdout=StringIO())
         self.assertEqual(CustomUser.objects.count(), 0)
         self.assertEqual(ProviderProfile.objects.count(), 0)
+
+    def test_seeded_provider_appears_in_marketplace_view(self):
+        call_command("seed_demo_data", stdout=StringIO())
+        response = Client().get(reverse("service_category", args=["plumbing-services"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Akhil Menon")

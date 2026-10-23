@@ -40,6 +40,7 @@ class Command(BaseCommand):
     help = "Create idempotent, clearly labelled FixNow marketplace demo data."
 
     def add_arguments(self, parser):
+        parser.add_argument("--database", default="default")
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -49,15 +50,16 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
+        database = options["database"]
         created = {"categories": 0, "pincodes": 0, "users": 0, "providers": 0, "provider_area_links": 0}
         skipped = []
 
         categories = {}
         for slug, name in DEMO_CATEGORIES.items():
-            category = ServiceCategory.objects.filter(slug=slug).first()
+            category = ServiceCategory.objects.using(database).filter(slug=slug).first()
             if category is None:
                 if not dry_run:
-                    category = ServiceCategory.objects.create(
+                    category = ServiceCategory.objects.using(database).create(
                         slug=slug,
                         name=name,
                         description=f"Demo marketplace category for {name.lower()}.",
@@ -68,10 +70,10 @@ class Command(BaseCommand):
 
         areas = {}
         for pincode, (area_name, district) in DEMO_AREAS.items():
-            pin = ServicePincode.objects.filter(pincode=pincode).first()
+            pin = ServicePincode.objects.using(database).filter(pincode=pincode).first()
             if pin is None:
                 if not dry_run:
-                    pin = ServicePincode.objects.create(
+                    pin = ServicePincode.objects.using(database).create(
                         pincode=pincode, area_name=area_name, district=district
                     )
                 created["pincodes"] += 1
@@ -79,10 +81,10 @@ class Command(BaseCommand):
 
         for slug, first_name, last_name, local_part, experience, bio, pincodes in DEMO_PROVIDERS:
             email = f"{local_part}@demo.fixnow.invalid"
-            user = CustomUser.objects.filter(email=email).first()
+            user = CustomUser.objects.using(database).filter(email=email).first()
             if user is None:
                 if not dry_run:
-                    user = CustomUser.objects.create_user(
+                    user = CustomUser.objects.db_manager(database).create_user(
                         email=email,
                         password=None,
                         first_name=first_name,
@@ -94,10 +96,10 @@ class Command(BaseCommand):
                 skipped.append(f"{email}: existing account is not a provider")
                 continue
 
-            profile = ProviderProfile.objects.filter(user=user).first() if user else None
+            profile = ProviderProfile.objects.using(database).filter(user=user).first() if user else None
             if profile is None:
                 if not dry_run:
-                    profile = ProviderProfile.objects.create(
+                    profile = ProviderProfile.objects.using(database).create(
                         user=user,
                         category=categories[slug],
                         bio=bio,
@@ -111,7 +113,7 @@ class Command(BaseCommand):
                 continue
 
             if profile:
-                existing_ids = set(profile.service_pincodes.values_list("id", flat=True))
+                existing_ids = set(profile.service_pincodes.using(database).values_list("id", flat=True))
                 missing = [areas[pin] for pin in pincodes if areas[pin] is not None and areas[pin].id not in existing_ids]
                 if not dry_run and missing:
                     profile.service_pincodes.add(*missing)
