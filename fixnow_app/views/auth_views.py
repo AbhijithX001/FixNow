@@ -1,5 +1,6 @@
 import secrets
 from django.utils import timezone
+from django.db import transaction
 from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -8,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from ..models import ProviderProfile, CustomerProfile
-from ..forms import CustomerRegistrationForm, LoginForm
+from ..forms import BookingForm, CustomerRegistrationForm, LoginForm
 
 User = get_user_model()
 
@@ -90,57 +91,75 @@ def service_category(request, slug):
 @login_required(login_url='user_login')
 def book_provider(request, provider_id):
     from ..models import ProviderProfile, Booking, BookingStatusLog, Notification
-    from django.utils import timezone
 
-    provider = get_object_or_404(ProviderProfile, id=provider_id, status='approved')
+    provider = get_object_or_404(
+        ProviderProfile,
+        id=provider_id,
+        status='approved',
+        is_available=True,
+    )
 
     if request.user.user_type != 'customer':
         return redirect('user_login')
 
     if request.method == 'POST':
-        scheduled_date = request.POST.get('scheduled_date')
-        scheduled_time = request.POST.get('scheduled_time')
-        address = request.POST.get('address', '').strip()
-        pincode = request.POST.get('pincode', '').strip()
-        description = request.POST.get('description', '').strip()
-
-        if not all([scheduled_date, scheduled_time, address, pincode, description]):
-            messages.error(request, 'All fields are required.')
+        form = BookingForm(request.POST, provider=provider)
+        if not form.is_valid():
+            messages.error(request, 'Please correct the booking details.')
             return render(request, 'frontend/booking_form.html', {
                 'provider': provider,
-                'today': timezone.now().date(),
+                'today': timezone.localdate(),
+                'form': form,
             })
 
-        booking = Booking.objects.create(
-            customer=request.user,
-            provider=provider,
-            category=provider.category,
-            description=description,
-            scheduled_date=scheduled_date,
-            scheduled_time=scheduled_time,
-            address=address,
-            pincode=pincode,
-            status='pending'
-        )
+        cleaned = form.cleaned_data
+        with transaction.atomic():
+            # Serialize booking submissions for this customer so concurrent
+            # retries cannot both pass the duplicate check.
+            User.objects.select_for_update().get(pk=request.user.pk)
+            duplicate = Booking.objects.filter(
+                customer=request.user,
+                provider=provider,
+                scheduled_date=cleaned['scheduled_date'],
+                scheduled_time=cleaned['scheduled_time'],
+                address=cleaned['address'],
+                pincode=cleaned['pincode'],
+                description=cleaned['description'],
+                status__in=['pending', 'confirmed'],
+            ).first()
+            if duplicate is not None:
+                booking = duplicate
+            else:
+                booking = Booking.objects.create(
+                    customer=request.user,
+                    provider=provider,
+                    category=provider.category,
+                    description=cleaned['description'],
+                    scheduled_date=cleaned['scheduled_date'],
+                    scheduled_time=cleaned['scheduled_time'],
+                    address=cleaned['address'],
+                    pincode=cleaned['pincode'],
+                    status='pending'
+                )
 
-        BookingStatusLog.objects.create(
-            booking=booking,
-            status='pending',
-            changed_by=request.user,
-            note='Booking created by customer.'
-        )
+                BookingStatusLog.objects.create(
+                    booking=booking,
+                    status='pending',
+                    changed_by=request.user,
+                    note='Booking created by customer.'
+                )
 
-        Notification.objects.create(
-            user=provider.user,
-            message=f'New booking request #{booking.id} from {request.user.get_full_name() or request.user.email}.'
-        )
+                Notification.objects.create(
+                    user=provider.user,
+                    message=f'New booking request #{booking.id} from {request.user.get_full_name() or request.user.email}.'
+                )
 
         return redirect('booking_confirm', booking_id=booking.id)
 
-    from django.utils import timezone
     return render(request, 'frontend/booking_form.html', {
         'provider': provider,
-        'today': timezone.now().date(),
+        'today': timezone.localdate(),
+        'form': BookingForm(provider=provider),
     })
 
 

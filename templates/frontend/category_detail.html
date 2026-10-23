@@ -127,5 +127,9 @@
     <span class="fn-footer__copy">© 2026 FixNow · Built by <a href="https://abhijithp.vercel.app/" target="_blank" rel="noopener">Abhijith P</a></span>
 </footer>
 
+{% if request.user.is_authenticated and request.user.user_type == 'customer' %}
+    {% include "frontend/ai_chat_widget.html" %}
+{% endif %}
+
 </body>
 </html>

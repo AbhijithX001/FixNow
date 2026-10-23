@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('fixnow_app.urls')),
+    path('ai/', include('ai_assistant.urls', namespace='ai_assistant')),
 ]

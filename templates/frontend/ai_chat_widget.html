@@ -1,0 +1,78 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/fixnow_chat.css' %}">
+
+<div class="fixnow-ai-widget" data-fixnow-ai data-chat-endpoint="{% url 'ai_assistant:chat' %}">
+    <button
+        type="button"
+        class="fixnow-ai-launcher"
+        data-ai-launcher
+        aria-expanded="false"
+        aria-controls="fixnow-ai-panel"
+        aria-label="Open FixNow AI assistant"
+    >
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path d="M12 3.5a8.5 8.5 0 0 0-7.4 12.7L3.5 20.5l4.6-1.2A8.5 8.5 0 1 0 12 3.5Z"/>
+            <path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>
+        </svg>
+        <span>Ask FixNow AI</span>
+    </button>
+
+    <section
+        id="fixnow-ai-panel"
+        class="fixnow-ai-panel"
+        data-ai-panel
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="fixnow-ai-title"
+        hidden
+    >
+        <header class="fixnow-ai-header">
+            <div class="fixnow-ai-heading">
+                <span class="fixnow-ai-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 3.5a8.5 8.5 0 0 0-7.4 12.7L3.5 20.5l4.6-1.2A8.5 8.5 0 1 0 12 3.5Z"/>
+                        <path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>
+                    </svg>
+                </span>
+                <span>
+                    <strong id="fixnow-ai-title">FixNow AI</strong>
+                    <span class="fixnow-ai-status"><i aria-hidden="true"></i> Home service assistant</span>
+                </span>
+            </div>
+            <button type="button" class="fixnow-ai-close" data-ai-close aria-label="Close FixNow AI assistant">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+        </header>
+
+        <div class="fixnow-ai-messages" data-ai-messages role="log" aria-live="polite" aria-relevant="additions text">
+            <div class="fixnow-ai-empty" data-ai-empty>
+                <span class="fixnow-ai-empty-kicker">Start with a description</span>
+                <p>Tell me what needs fixing at home, and I’ll help identify the right FixNow service.</p>
+            </div>
+        </div>
+
+        <div class="fixnow-ai-status-message" data-ai-status role="status" aria-live="polite"></div>
+
+        <form class="fixnow-ai-composer" data-ai-form>
+            {% csrf_token %}
+            <label class="sr-only" for="fixnow-ai-input">Message FixNow AI</label>
+            <textarea
+                id="fixnow-ai-input"
+                class="fixnow-ai-input"
+                data-ai-input
+                rows="1"
+                maxlength="2000"
+                placeholder="Describe a home-service problem..."
+                autocomplete="off"
+                required
+            ></textarea>
+            <button type="submit" class="fixnow-ai-send" data-ai-send aria-label="Send message">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m4 4 16 8-16 8 3.5-8L4 4Z"/><path d="M7.5 12H20"/></svg>
+            </button>
+        </form>
+        <p class="fixnow-ai-disclaimer">AI can make mistakes. FixNow’s booking flow remains the source of truth.</p>
+    </section>
+</div>
+
+<script src="{% static 'js/fixnow_chat.js' %}" defer></script>

@@ -425,5 +425,9 @@
     </span>
 </footer>
 
+{% if request.user.is_authenticated and request.user.user_type == 'customer' %}
+    {% include "frontend/ai_chat_widget.html" %}
+{% endif %}
+
 </body>
 </html>

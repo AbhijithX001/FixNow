@@ -72,6 +72,13 @@
             <div class="form-card-title">Booking Details</div>
             <form method="POST">
                 {% csrf_token %}
+                {% if form.errors %}
+                <div role="alert" style="margin-bottom:16px; color:#b91c1c; font-size:13px;">
+                    Please correct the highlighted booking details before submitting.
+                    {{ form.non_field_errors }}
+                    {% for field in form %}{{ field.errors }}{% endfor %}
+                </div>
+                {% endif %}
                 <div class="two-col">
                     <div class="fn-field">
                         <label class="fn-label">Preferred Date</label>
@@ -104,6 +111,10 @@
     <span class="fn-footer__logo">FixNow</span>
     <span class="fn-footer__copy">© 2026 FixNow · Built by <a href="https://abhijithp.vercel.app/" target="_blank" rel="noopener">Abhijith P</a></span>
 </footer>
+
+{% if request.user.is_authenticated and request.user.user_type == 'customer' %}
+    {% include "frontend/ai_chat_widget.html" %}
+{% endif %}
 
 </body>
 </html>
